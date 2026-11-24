@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코밀 Co-Meal 관리자</title>
+<meta name="description" content="우리 동네에서 시작되는 가장 가벼운 한 끼의 연결, 코밀">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#C4401F;--accent-d:#A23517;--tint:#FBE9E1;--tint-t:#A23517;--cream:#F6EDE3;--ink:#3A2621;--txt:#2A1D19;--sub:#6E625D;--line:#EEE6DE;--gray:#F4EFEA;--blue:#2F5D8A;--blue-bg:#E8F0F8;--green:#2F6B45;--green-bg:#E5F2E9}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E9E1D8}
+body{font-family:'Noto Sans KR',system-ui,sans-serif;color:var(--txt);letter-spacing:-0.2px;-webkit-font-smoothing:antialiased}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:480px;margin:0 auto;height:100%;background:#fff;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.app.wide{max-width:1180px}
+.adm{padding:24px 32px 48px}
+.ahdr{display:flex;align-items:center;justify-content:space-between;padding:18px 32px 10px;gap:12px;flex-wrap:wrap}
+.atabs{display:flex;flex-wrap:wrap;padding:0 32px;border-bottom:1px solid var(--line)}
+.atab{border:0;background:none;padding:12px 4px;margin-right:22px;font-size:15px;font-weight:700;color:var(--sub);border-bottom:3px solid transparent;min-height:48px}
+.atab.on{color:var(--ink);border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:28px}
+.stat{background:var(--cream);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--sub);font-weight:700}
+.stat b{display:block;font-size:30px;font-weight:900;color:var(--ink);margin-top:4px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+.tbl th{text-align:left;font-size:12px;color:var(--sub);font-weight:700;padding:12px 12px;border-bottom:1px solid var(--line);background:#FBF7F3}
+.tbl td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.aform{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:28px;padding:22px;border:1px solid var(--line);border-radius:14px;background:#FFFCF9}
+.ah2{font-size:18px;font-weight:800;margin:0 0 14px}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.main::-webkit-scrollbar{display:none}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand b{font-size:21px;font-weight:900;color:var(--accent);letter-spacing:-0.4px}
+.iconbtn{width:44px;height:44px;border:0;background:none;display:flex;align-items:center;justify-content:center;border-radius:22px;color:var(--ink)}
+.iconbtn:hover{background:var(--gray)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.hero{margin:4px 20px 16px;padding:20px;background:var(--ink);border-radius:18px;color:#fff}
+.hero .k{font-size:13px;color:#F2C9B8;font-weight:700}
+.hero .t{font-size:20px;font-weight:800;line-height:1.4;margin-top:4px}
+.hero .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pill{height:44px;padding:0 18px;border:0;border-radius:22px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;flex-shrink:0}
+.pill:hover{background:var(--accent-d)}
+.pill.light{background:#fff;color:var(--ink)}
+.pill.light:hover{background:var(--cream)}
+.sep{height:8px;background:var(--gray)}
+.sec{padding:20px 20px 6px}
+.sec h2{margin:0;font-size:18px;font-weight:800}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.muted{font-size:13px;color:var(--sub)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{min-height:38px;padding:0 14px;border-radius:19px;border:1px solid #DCD2C8;background:#fff;color:#4A3F3A;font-size:14px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.chip.on{border-color:var(--ink);background:var(--ink);color:#fff;font-weight:700}
+.list{padding:2px 20px 24px}
+.card{width:100%;border:0;background:none;padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;text-align:left}
+.thumb{width:84px;height:84px;flex-shrink:0;border-radius:14px;display:flex;align-items:flex-end;padding:10px;font-size:13px;font-weight:800;color:#3A2A20;word-break:keep-all}
+.cbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ctitle{font-size:16px;font-weight:700;line-height:1.35;word-break:keep-all}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.tag{font-size:12px;font-weight:500;color:#4A3F3A;background:var(--gray);padding:3px 8px;border-radius:6px}
+.tag.quiet{color:var(--blue);background:var(--blue-bg);font-weight:700}
+.tag.talk{color:var(--tint-t);background:var(--tint);font-weight:700}
+.tag.g{color:#5B3FA0;background:#EFE9FA;font-weight:700}
+.tag.full{color:#fff;background:#6E625D;font-weight:700}
+.tag.new{color:#fff;background:var(--accent);font-weight:700}
+.tag.warn{color:#B3261E;background:#FDECEA;font-weight:700}
+.tag.ok{color:var(--green);background:var(--green-bg);font-weight:700}
+.tag.bolt{color:#7A4A00;background:#FFF0C9;font-weight:700}
+.reason{font-size:12px;font-weight:700;color:var(--green)}
+.hostline{font-size:12px;color:var(--sub)}
+.cnt{font-size:13px;font-weight:700;color:var(--accent)}
+.empty{padding:40px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty b{font-size:16px}
+.nav{flex-shrink:0;height:68px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff}
+.nav button{position:relative;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#9A8F89;font-size:11px;font-weight:700}
+.nav button.on{color:var(--ink)}
+.badge{position:absolute;top:6px;left:calc(50% + 4px);min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px;padding:0 5px;text-align:center}
+.top{display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;position:sticky;top:0;background:#fff;z-index:2}
+.top h1{margin:0;font-size:17px;font-weight:800}
+.dhero{height:180px;display:flex;align-items:flex-end;padding:20px;font-size:28px;font-weight:800;color:#3A2A20;word-break:keep-all}
+.pad{padding:20px}
+.dl{margin:0;padding:8px 20px}
+.dl div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.dl div:last-child{border-bottom:0}
+.dl dt{font-size:14px;color:var(--sub);flex-shrink:0}
+.dl dd{margin:0;font-size:14px;font-weight:700;text-align:right;word-break:keep-all}
+.note{margin:4px 20px 16px;padding:16px;border-radius:12px;background:var(--cream);font-size:14px;line-height:1.6;color:var(--txt);white-space:pre-wrap;word-break:break-word}
+.subh{font-size:15px;font-weight:800;margin:0;padding:18px 20px 0}
+.members{display:flex;flex-direction:column;gap:14px;padding:12px 20px 20px}
+.mem{display:flex;align-items:center;gap:12px}
+.av{width:42px;height:42px;border-radius:21px;background:var(--tint);color:var(--tint-t);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
+.mrow{display:flex;flex-direction:column;gap:8px}
+.memact{display:flex;gap:6px;flex-wrap:wrap;padding-left:54px}
+.mbtn{min-height:36px;padding:0 12px;border-radius:9px;border:1px solid #DCD2C8;background:#fff;font-size:13px;font-weight:700}
+.mbtn:disabled{color:#A49A94;cursor:default}
+.mbtn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.mbtn.warn{color:#B3261E;border-color:#F0C4C0}
+.more{margin-left:auto;width:44px;height:44px;border:0;background:none;border-radius:22px;font-size:20px;font-weight:800;color:var(--sub)}
+.more:hover{background:var(--gray)}
+.bar{flex-shrink:0;padding:12px 20px 16px;border-top:1px solid var(--line);display:flex;gap:10px;background:#fff}
+.btn{flex:1;height:52px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:700}
+.btn:hover{background:var(--accent-d)}
+.btn:disabled{background:#CFC6BF;cursor:default}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid #DCD2C8}
+.btn.ghost:hover{background:var(--gray)}
+.btn.sm{height:44px;font-size:14px;flex:0 0 auto;padding:0 16px}
+.form{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field>label,.field>.lbl{font-size:15px;font-weight:700}
+.inp{height:48px;border:1px solid #DCD2C8;border-radius:12px;padding:0 14px;font-size:15px;background:#fff;outline:none;width:100%}
+textarea.inp{height:88px;padding:12px 14px;resize:none;line-height:1.5}
+.inp:focus{border-color:var(--ink)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mood{display:flex;flex-direction:column;gap:10px}
+.moodbtn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:15px;border-radius:14px;background:#fff;border:1px solid #DCD2C8}
+.moodbtn.on{background:var(--tint);border:2px solid var(--accent);padding:14px}
+.moodbtn b{font-size:15px}
+.moodbtn span{font-size:13px;color:var(--sub);line-height:1.5}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:44px;height:44px;border-radius:22px;border:1px solid #DCD2C8;background:#fff;font-size:20px;font-weight:700}
+.stepper output{font-size:17px;font-weight:800;min-width:40px;text-align:center}
+.chat{padding:4px 20px 12px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;flex-direction:column;gap:3px;max-width:80%}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg .who{font-size:11px;color:var(--sub)}
+.msg .txt{padding:9px 13px;border-radius:14px;background:var(--gray);font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.me .txt{background:var(--accent);color:#fff}
+.sysmsg{align-self:center;font-size:12px;font-weight:700;color:var(--green);background:var(--green-bg);padding:5px 12px;border-radius:12px}
+.chatin{display:flex;gap:8px;padding:0 20px 16px}
+.banner2{margin:12px 20px 0;padding:12px 14px;border-radius:12px;background:var(--blue-bg);color:var(--blue);font-size:13px;line-height:1.5}
+.banner2.red{background:#FDECEA;color:#B3261E}
+.banner2.green{background:var(--green-bg);color:var(--green)}
+.toast{position:absolute;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:24px;font-size:14px;font-weight:500;white-space:nowrap;z-index:10;pointer-events:none}
+.notice{position:absolute;left:12px;right:12px;top:12px;z-index:11;border:0;background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.notice span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.confirm{margin:0 20px 16px;padding:16px;border:1px solid #F3C6B5;background:#FFF8F5;border-radius:12px;display:flex;flex-direction:column;gap:12px}
+.confirm .acts{display:flex;gap:8px}
+.pcard{margin:12px 20px 0;padding:18px;border-radius:16px;background:var(--cream);display:flex;flex-direction:column;gap:10px}
+.pcard .av{width:52px;height:52px;border-radius:26px;font-size:19px;background:#fff}
+.mtags{display:flex;gap:6px;flex-wrap:wrap}
+.spoonb{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:#3A2621;border-radius:24px;flex-shrink:0}
+.spoonb img{height:40px;width:auto;transform:rotate(-30deg)}
+.mtags{align-items:center}
+.spoons{display:flex;gap:2px;justify-content:center;margin:6px 0 6px}
+.sp{background:none;border:0;padding:4px 6px;cursor:pointer;opacity:.28;filter:grayscale(1);transition:opacity .15s,filter .15s,transform .15s}
+.sp img{height:96px;width:auto;display:block}
+.sp.on{opacity:1;filter:none;transform:translateY(-3px)}
+.splab{text-align:center;font-size:14px;color:#6E625D;margin-bottom:6px}
+.splab b{color:var(--ink)}
+.mtag{font-size:12px;font-weight:700;color:var(--ink);background:#fff;border:1px solid #E5D9CD;padding:4px 9px;border-radius:14px}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;font-size:14px;padding:8px 0;min-height:44px}
+.ckrow{display:flex;align-items:flex-start;gap:12px;border:0;background:none;text-align:left;padding:10px 0;font-size:14px;line-height:1.5;min-height:44px}
+.ck{width:24px;height:24px;flex-shrink:0;border-radius:7px;border:2px solid #C9BFB7;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
+.ck.on{background:var(--accent);border-color:var(--accent)}
+.adrow{display:flex;gap:12px;overflow-x:auto;padding:12px 20px 4px}
+.adrow::-webkit-scrollbar{display:none}
+.adc{flex:0 0 200px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column}
+.adth{height:84px;display:flex;align-items:flex-end;padding:10px;font-weight:800;font-size:13px;color:#3A2A20}
+.adb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}
+.adb b{font-size:15px}
+.adl{font-size:11px;font-weight:700;color:var(--sub);border:1px solid #CFC5BC;border-radius:4px;padding:0 5px;align-self:flex-start}
+.adp{font-size:12px;font-weight:700;color:var(--accent)}
+.perk{margin:4px 20px 16px;padding:14px 16px;border-radius:12px;background:var(--tint);display:flex;flex-direction:column;gap:4px;color:var(--tint-t);font-size:14px;line-height:1.5}
+.rv{margin:12px 20px;padding:16px;border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;gap:12px}
+.steps{display:flex;gap:6px;padding:4px 20px 0;flex-wrap:wrap}
+.step{font-size:12px;font-weight:700;color:#A49A94;background:var(--gray);padding:5px 10px;border-radius:12px}
+.step.on{color:#fff;background:var(--ink)}
+.step.done{color:var(--green);background:var(--green-bg)}
+</style>
+</head>
+<body>
+<div class="app" id="app"><main class="main" id="main"><div class="empty"><b style="color:#C4401F;font-size:20px">Co-Meal</b><span class="muted">한 끼를 위한 가장 가벼운 연결</span></div></main></div>
+<script>
+/* ===== 1) Firebase 설정값: Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)에서 복사해 붙여넣으세요 ===== */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC14T0ySoYmVC_zkK7LSpYECq7rIo2l-xk",
+  authDomain: "comeal-eb920.firebaseapp.com",
+  projectId: "comeal-eb920",
+  storageBucket: "comeal-eb920.firebasestorage.app",
+  messagingSenderId: "139273657160",
+  appId: "1:139273657160:web:b52127a3f49095f4b1f17d"
+};
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+'use strict';
+var APP_MODE='admin';
+var AREAS=['상도동','노량진','흑석동','사당','대방','신대방'];
+var MENUS=['한식','국밥·찌개','고기','중식·마라','분식','일식','양식','디저트·카페','아무거나'];
+var PURPOSES=['2인분 메뉴 나눠 먹기','맛집 탐방','동네 친구','공부·취준 메이트','퇴근 후 한 끼'];
+var AGES=['20대 초반','20대 중반','20대 후반','30대','40대 이상'];
+var DIETS=['가리는 것 없어요','채식해요','매운 거 좋아해요','매운 건 못 먹어요','양 많이 먹어요','소식해요','술 없이 먹어요'];
+var FOODS=['한식','국밥·찌개','고기','중식·마라','분식','일식','양식','디저트·카페'];
+var MANNER=['시간 약속을 잘 지켜요','대화가 편했어요','매너가 좋아요','조용히 편하게 먹었어요','맛집을 잘 알아요'];
+var MODE={quiet:'조용히 먹기',talk:'대화하며 먹기'};
+var GL={female:'여성',male:'남성'};
+var TINTS={'한식':'#E3EEDC','국밥·찌개':'#FCE3D3','고기':'#F8DCDC','중식·마라':'#FBE7CF','분식':'#FDE8EC','일식':'#E4ECF6','양식':'#EFE7F7','디저트·카페':'#F1E2D3','아무거나':'#F1E6D2'};
+var SPOON=[null,{n:'플라스틱수저',l:'아쉬웠어요'},{n:'나무수저',l:'그저 그랬어요'},{n:'은수저',l:'괜찮았어요'},{n:'금수저',l:'좋았어요'},{n:'다이아수저',l:'최고였어요'}];
+var SPOON_IMG={"1": "data:image/webp;base64,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", "2": "data:image/webp;base64,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", "3": "data:image/webp;base64,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", "4": "data:image/webp;base64,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", "5": "data:image/webp;base64,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"};
+function spoonImg(k){return '<img src="'+SPOON_IMG[k]+'" alt="">';}
+var NS_LIMIT=3,NS_DAYS=14,REVIEW_WINDOW=48*3600e3;
+var LOGO='<svg width="34" height="17" viewBox="0 0 260 130" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="24"><path d="M88 26 A46 46 0 1 0 88 104"/><path d="M172 26 A46 46 0 1 1 172 104"/></g><rect x="78" y="54" width="104" height="20" fill="currentColor"/><rect x="120" y="54" width="20" height="58" fill="currentColor"/></svg>';
+var ICON={
+ back:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
+ plus:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+ home:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>',
+ find:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15.5 14.2c3 .2 5.5 2.6 5.5 5.8"/></svg>',
+ add:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 8v8M8 12h8"/></svg>',
+ my:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+ send:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg>'
+};
+
+var db=null,user=null,uid=null,canWrite=null,readOnly=false,amAdmin=false,dbChecked=false,slow=false,loadErr='';
+var tables=[],reqs=[],messages=[],profiles={},noshows={},reviews={},ads=[],bans={},moder={dismissed:{}},adminChecked=false;
+var loaded={t:false,r:false,m:false,p:false,n:false,v:false,a:false,b:false,d:false};
+var priv={blocks:[],lastRead:{},agreedAt:0},privLoaded=false,privQ=false,privBusy=false,markT=null;
+var bootAt=Date.now(),seenMsg={},msgInit=false,reqSeen=null;
+var S={screen:'home',sel:null,prev:'home',filter:{mode:'all',menu:'전체'},
+  find:{mood:'quiet',slot:'저녁',area:null,menu:'아무거나',near:false},
+  form:null,draft:'',reqMsg:'',confirmDel:false,busy:false,toast:'',notice:null,memMenu:null,ob:null,edit:null,rv:null,adForm:null,adSel:null};
+
+// ---------- utils ----------
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pad(n){return (n<10?'0':'')+n;}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function safeId(s){return String(s).replace(/[^A-Za-z0-9_\-.~:@+]/g,'_');}
+function when(t){var d=new Date(t.date+'T'+(t.time||'12:00'));return isNaN(d)?0:d.getTime();}
+function slotOf(time){var h=parseInt((time||'12').slice(0,2),10);return h<15?'점심':(h<21?'저녁':'야식');}
+function dayLabel(date){var today=ymd(new Date()),tm=new Date();tm.setDate(tm.getDate()+1);if(date===today)return '오늘';if(date===ymd(tm))return '내일';var d=new Date(date+'T00:00');if(isNaN(d))return date;return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+'일월화수목금토'[d.getDay()]+')';}
+function timeLabel(t){var p=(t.time||'').split(':');var h=+p[0],m=p[1]||'00';if(isNaN(h))return '';return (h<12?'오전 ':'오후 ')+((h%12)||12)+':'+m;}
+function fmtDate(ms){var d=new Date(ms);return (d.getMonth()+1)+'월 '+d.getDate()+'일';}
+function byId(id){return tables.filter(function(x){return x.id===id;})[0];}
+function toast(msg){S.toast=msg;render();clearTimeout(toast._t);toast._t=setTimeout(function(){S.toast='';render();},2400);}
+function fail(e){S.busy=false;if(e&&e.code==='permission-denied'){toast('권한이 없어서 저장하지 못했어요');render();return;}if(e&&e.code==='invalid_argument'&&canWrite!==true){readOnly=true;toast('이 링크에서는 둘러보기만 할 수 있어요');return;}if(e&&e.code==='quota_exceeded'){toast('저장 공간이 가득 찼어요');return;}toast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');render();}
+
+// ---------- people ----------
+function prof(id){return profiles[id]||{};}
+function me(){return prof(uid);}
+function nick(id){var n=prof(id).nick;if(id===uid)return n||'나';return n||'이웃';}
+function initial(id){return esc(nick(id).charAt(0));}
+function okPhoto(u){return typeof u==='string'&&u.indexOf('data:image/jpeg;base64,')===0&&u.length<120000;}
+function avHtml(id){var ph=prof(id).photo;return okPhoto(ph)?'<span class="av" style="padding:0;overflow:hidden"><img src="'+ph+'" alt="" style="width:100%;height:100%;object-fit:cover"></span>':'<span class="av">'+initial(id)+'</span>';}
+function photoField(cur,inputId,rmAct){return '<div class="field"><span class="lbl">프로필 사진 <span class="muted" style="font-weight:400">(선택)</span></span><div style="display:flex;align-items:center;gap:14px"><span class="av" style="width:64px;height:64px;border-radius:32px;padding:0;overflow:hidden;font-size:22px">'+(okPhoto(cur)?'<img src="'+cur+'" alt="" style="width:100%;height:100%;object-fit:cover">':'🙂')+'</span><label class="mbtn" style="cursor:pointer">사진 '+(cur?'바꾸기':'고르기')+'<input type="file" accept="image/*" id="'+inputId+'" style="display:none"></label>'+(cur?'<button class="mbtn" data-act="'+rmAct+'">삭제</button>':'')+'</div><span class="muted" style="font-size:12px">얼굴이 아니어도 괜찮아요. 음식, 동네 풍경 사진도 좋아요.</span></div>';}
+function readPhoto(file,cb){if(!file||!/^image\//.test(file.type)){toast('사진 파일을 골라 주세요');return;}var fr=new FileReader();fr.onload=function(){var img=new Image();img.onload=function(){var n=192,c=document.createElement('canvas');c.width=c.height=n;var sz=Math.min(img.width,img.height),sx=(img.width-sz)/2,sy=(img.height-sz)/2;var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,n,n);x.drawImage(img,sx,sy,sz,sz,0,0,n,n);var q=.82,u=c.toDataURL('image/jpeg',q);while(u.length>100000&&q>.4){q-=.12;u=c.toDataURL('image/jpeg',q);}cb(u);};img.onerror=function(){toast('이 사진은 열 수 없어요');};img.src=fr.result;};fr.readAsDataURL(file);}
+function genderOf(id){var g=prof(id).gender;return GL[g]?g:null;}
+function gTxt(id){var g=genderOf(id);return g?GL[g]:'성별 미설정';}
+function myGender(){return genderOf(uid);}
+var THIS_YEAR=new Date().getFullYear();
+var BAND_MID={'20대 초반':21,'20대 중반':25,'20대 후반':28,'30대':34,'40대 이상':45};
+function bandOfAge(n){if(!n)return null;if(n<24)return '20대 초반';if(n<27)return '20대 중반';if(n<30)return '20대 후반';if(n<40)return '30대';return '40대 이상';}
+function ageNum(id){var p=prof(id);if(p.birthYear)return THIS_YEAR-p.birthYear;return BAND_MID[p.age]||0;}
+function ageOf(id){return bandOfAge(ageNum(id));}
+function ageIdx(id){return AGES.indexOf(ageOf(id));}
+function validBy(v){var n=parseInt(v,10);return n>=1950&&n<=THIS_YEAR-19?n:0;}
+function ageRangeTxt(t){if(t.ageMin||t.ageMax)return (t.ageMin||19)+'~'+(t.ageMax||70)+'세';return t.ageNear?t.ageNear+' 또래':'';}
+function dietsOf(id){return (prof(id).diets||[]).filter(function(d){return DIETS.indexOf(d)>=0;});}
+function ageNearOk(t){if(t.ageMin||t.ageMax){var n=ageNum(uid);return !!n&&n>=(t.ageMin||19)&&n<=(t.ageMax||70);}if(!t.ageNear)return true;var a=ageIdx(uid),h=AGES.indexOf(t.ageNear);return a>=0&&h>=0&&Math.abs(a-h)<=1;}
+function infoLine(id){var p=prof(id),x=[gTxt(id)];if(ageOf(id))x.push(ageOf(id));if(p.area)x.push(p.area);return x.join(' · ');}
+function foodsOf(id){return (prof(id).foods||[]).filter(function(d){return FOODS.indexOf(d)>=0;});}
+function dietChips(id){var f=foodsOf(id),d=dietsOf(id);return (f.length||d.length)?'<div class="tags">'+f.map(function(x){return '<span class="tag" style="background:#FBE9E1;color:#A23517">♥ '+esc(x)+'</span>';}).join('')+d.map(function(x){return '<span class="tag">'+esc(x)+'</span>';}).join('')+'</div>':'';}
+function isBlockedUser(id){return priv.blocks.indexOf(id)>=0;}
+function mannerOf(id){var c={},again=0,n=0,sum=0,sc=0;Object.keys(reviews).forEach(function(by){var it=(reviews[by]&&reviews[by].items)||{};Object.keys(it).forEach(function(k){var r=it[k];if(!r||r.target!==id)return;n++;(r.tags||[]).forEach(function(tg){c[tg]=(c[tg]||0)+1;});if(r.again)again++;if(r.score>=1&&r.score<=5){sum+=r.score;sc++;}});});
+  var top=Object.keys(c).sort(function(a,b){return c[b]-c[a];});return {counts:c,top:top,again:again,n:n,sc:sc,avg:sc?sum/sc:0};}
+function spoonLv(m){return Math.min(5,Math.max(1,Math.round(m.avg)));}
+function spoonBadge(id){var m=mannerOf(id);if(!m.sc)return '';var k=spoonLv(m);return '<span class="spoonb" title="매너 평가 '+m.avg.toFixed(1)+'" aria-label="매너 평가 '+m.avg.toFixed(1)+'점">'+spoonImg(k)+'</span>';}
+function isDismissed(by,k){return !!(moder.dismissed&&moder.dismissed[safeId(by)+'|'+k]);}
+function isBanned(id){var b=bans[id];return b&&b.until>Date.now()?b.until:0;}
+function nsTables(id){var s={};Object.keys(noshows).forEach(function(by){var it=(noshows[by]&&noshows[by].items)||{};Object.keys(it).forEach(function(k){var r=it[k];if(r&&r.target===id&&r.tableId&&!isDismissed(by,k))s[r.tableId]=Math.max(s[r.tableId]||0,r.at||0);});});return s;}
+function nsCount(id){return Object.keys(nsTables(id)).length;}
+function restrictedUntil(id){var bn=isBanned(id);if(bn)return bn;var s=nsTables(id),ks=Object.keys(s);if(ks.length<NS_LIMIT)return 0;var last=0;ks.forEach(function(k){last=Math.max(last,s[k]);});var u=last+NS_DAYS*864e5;return u>Date.now()?u:0;}
+function myRestriction(){return uid?restrictedUntil(uid):0;}
+
+// ---------- membership ----------
+function reqsOf(t){return reqs.filter(function(r){return r.tableId===t.id;});}
+function membersOf(t){var ids=[t.hostId];reqsOf(t).forEach(function(r){if(r.status==='accepted'&&ids.indexOf(r.userId)<0)ids.push(r.userId);});return ids;}
+function pendingOf(t){return reqsOf(t).filter(function(r){return r.status==='pending';});}
+function myReq(t){return reqsOf(t).filter(function(r){return r.userId===uid;})[0];}
+function isMember(t){return membersOf(t).indexOf(uid)>=0;}
+function isFull(t){return membersOf(t).length>=t.capacity;}
+function upcoming(t){return when(t)>Date.now()-2*3600e3;}
+function phase(t){var w=when(t),n=Date.now();if(t.endedAt&&n<w+3600e3){return n<t.endedAt+REVIEW_WINDOW?'after':'closed';}if(n<w-2*3600e3)return 'before';if(n<w+3600e3)return 'day';if(n<w+REVIEW_WINDOW)return 'after';return 'closed';}
+function gBlocked(t){return (t.genderOnly&&myGender()!==t.genderOnly)||!ageNearOk(t);}
+function blockReason(t){if(t.genderOnly&&myGender()!==t.genderOnly)return GL[t.genderOnly]+'만 참여할 수 있어요';if(!ageNearOk(t))return ageNum(uid)?ageRangeTxt(t)+'만 참여할 수 있어요':'프로필에서 출생연도를 먼저 설정해 주세요';return '';}
+function hasBlockedMember(t){return membersOf(t).some(function(id){return id!==uid&&isBlockedUser(id);});}
+function reviewKey(t,target){return safeId(t.id)+'__'+safeId(target);}
+function reviewedAll(t){var it=(reviews[uid]&&reviews[uid].items)||{};var ns=(noshows[uid]&&noshows[uid].items)||{};return membersOf(t).filter(function(id){return id!==uid;}).every(function(id){var k=reviewKey(t,id);return it[k]||ns[k];});}
+function needsReview(t){return isMember(t)&&membersOf(t).length>1&&phase(t)==='after'&&!reviewedAll(t);}
+
+// ---------- match score ----------
+function matchInfo(t){
+  var m=me(),sc=0,why=[];
+  if(m.area&&t.area===m.area){sc+=3;why.push('같은 동네');}
+  if(foodsOf(uid).indexOf(t.menu)>=0){sc+=3;why.push('좋아하는 메뉴');}
+  var ov=(m.purposes||[]).filter(function(p){return (t.purposes||[]).indexOf(p)>=0;});
+  if(ov.length){sc+=2*ov.length;why.push(ov[0]);}
+  var ai=ageIdx(uid),hi=ageIdx(t.hostId);if(ai>=0&&hi>=0&&Math.abs(ai-hi)<=1){sc+=1;why.push(ai===hi?'같은 연령대':'비슷한 또래');}
+  var dv=dietsOf(uid).filter(function(d){return d!=='가리는 것 없어요'&&dietsOf(t.hostId).indexOf(d)>=0;});if(dv.length){sc+=1;why.push('식습관: '+dv[0]);}
+  var mt=mannerOf(t.hostId);if(mt.again>0){sc+=1;why.push('재매칭 희망 '+mt.again+'회');}
+  var h=(when(t)-Date.now())/3600e3;if(h>0&&h<24){sc+=1;}
+  if(t.quick)sc+=1;
+  return {score:sc,why:why};
+}
+function visible(t){return !isBlockedUser(t.hostId)&&!isBanned(t.hostId)&&!hasBlockedMember(t)&&t.status!=='closed';}
+
+// ---------- private state ----------
+function savePriv(){if(!uid||!db)return;if(privBusy){privQ=true;return;}privBusy=true;
+  db.doc('data/users/'+uid+'/state').set({blocks:priv.blocks.slice(0,500),lastRead:priv.lastRead,agreedAt:priv.agreedAt||0,updatedAt:Date.now()})
+  .then(function(){privBusy=false;if(privQ){privQ=false;savePriv();}}).catch(function(){privBusy=false;});}
+function markRead(tid){priv.lastRead[tid]=Date.now();clearTimeout(markT);markT=setTimeout(function(){markT=null;savePriv();},800);}
+function joinedAt(t){if(t.hostId===uid)return t.createdAt||0;var r=myReq(t);return r?(r.decidedAt||r.at||0):Infinity;}
+function unread(t){if(!isMember(t))return 0;var since=Math.max(priv.lastRead[t.id]||0,joinedAt(t));return messages.filter(function(m){return m.tableId===t.id&&m.userId!==uid&&!isBlockedUser(m.userId)&&m.at>since;}).length;}
+function hostPending(){return tables.filter(function(t){return t.hostId===uid&&upcoming(t);}).reduce(function(n,t){return n+pendingOf(t).length;},0);}
+function myBadge(){return tables.reduce(function(n,t){return n+unread(t)+(needsReview(t)?1:0);},0)+hostPending();}
+function notify(tid,title,body){S.notice={tid:tid,title:title,body:body};clearTimeout(notify._t);notify._t=setTimeout(function(){S.notice=null;render();},5000);}
+
+// ---------- writes ----------
+function saveProfile(data,okMsg){
+  if(!uid)return Promise.resolve();
+  var next=Object.assign({},me(),data,{updatedAt:Date.now()});delete next._id;
+  profiles[uid]=next;render();
+  return db.doc('profiles/'+uid).set(next).then(function(){if(okMsg)toast(okMsg);}).catch(function(e){fail(e);});
+}
+function guard(){
+  if(myRestriction()){toast(fmtDate(myRestriction())+'까지 이용이 제한돼요');return false;}
+  return true;
+}
+function createTable(){
+  var f=S.form;if(!guard())return;
+  if(!f.title.trim()){toast('한 줄 소개를 입력해 주세요');return;}
+  if(!f.quick&&(!f.date||!f.time)){toast('날짜와 시간을 정해 주세요');return;}
+  var date=f.date,time=f.time;
+  if(f.quick){var d=new Date(Date.now()+30*60e3);d.setMinutes(Math.ceil(d.getMinutes()/10)*10);date=ymd(d);time=pad(d.getHours())+':'+pad(d.getMinutes()%60);}
+  S.busy=true;render();
+  db.collection('tables').add({hostId:uid,title:f.title.trim().slice(0,60),area:f.area,place:f.place.trim().slice(0,40),menu:f.menu,mode:f.mode,purposes:f.purposes.slice(0,3),
+    date:date,time:time,quick:!!f.quick,genderOnly:f.only?myGender():null,ageMin:f.range?f.amin:null,ageMax:f.range?f.amax:null,capacity:Math.max(2,Math.min(6,f.capacity|0)),note:f.note.trim().slice(0,300),createdAt:Date.now(),status:'open'})
+  .then(function(ref){S.busy=false;S.form=null;S.sel=ref.id;S.prev='home';S.screen='detail';toast(f.quick?'번개 밥약을 열었어요':'밥약을 열었어요');})
+  .catch(fail);
+}
+function requestJoin(t){
+  if(!guard())return;
+  if(hasBlockedMember(t)){toast('차단한 사용자가 있는 밥약이에요');return;}
+  if(gBlocked(t)){toast(blockReason(t));return;}
+  if(isFull(t)){toast('이미 인원이 다 찼어요');return;}
+  S.busy=true;render();
+  db.collection('joins').doc(safeId(t.id)+'__'+safeId(uid)).set({tableId:t.id,userId:uid,at:Date.now(),status:'pending',msg:S.reqMsg.trim().slice(0,80)})
+  .then(function(){S.busy=false;S.reqMsg='';toast('신청했어요. 모집자가 수락하면 알려드려요');}).catch(fail);
+}
+function decide(t,r,ok){
+  if(ok&&isFull(t)){toast('인원이 다 찼어요');return;}
+  S.busy=true;render();
+  db.collection('joins').doc(r._id).update({status:ok?'accepted':'declined',decidedAt:Date.now()})
+  .then(function(){S.busy=false;toast(ok?nick(r.userId)+'님과 매칭됐어요':'신청을 거절했어요');}).catch(fail);
+}
+function cancelReq(t){var r=myReq(t);if(!r)return;S.busy=true;render();db.collection('joins').doc(r._id).delete().then(function(){S.busy=false;toast('참여를 취소했어요');}).catch(fail);}
+function kick(t,id){var r=reqsOf(t).filter(function(x){return x.userId===id;})[0];if(!r)return;S.busy=true;S.memMenu=null;render();db.collection('joins').doc(r._id).delete().then(function(){S.busy=false;toast('밥약에서 내보냈어요');}).catch(fail);}
+function closeTable(t){
+  S.busy=true;render();
+  var chain=Promise.resolve();
+  reqsOf(t).forEach(function(r){chain=chain.then(function(){return db.collection('joins').doc(r._id).delete();});});
+  messages.filter(function(m){return m.tableId===t.id;}).forEach(function(m){chain=chain.then(function(){return db.collection('messages').doc(m._id).delete();});});
+  chain=chain.then(function(){return db.collection('tables').doc(t.id).delete();});
+  chain.then(function(){S.busy=false;S.confirmDel=false;S.screen='my';S.sel=null;toast('밥약을 닫았어요');}).catch(fail);
+}
+function sendMsg(t,txt,sys){
+  txt=(txt||'').trim();if(!txt)return;
+  if(!sys){S.draft='';var el=document.getElementById('chat-in');if(el)el.value='';}
+  db.collection('messages').add({tableId:t.id,userId:uid,text:txt.slice(0,300),sys:!!sys,at:Date.now()}).catch(function(e){if(!sys)S.draft=txt;fail(e);});
+}
+function arrived(t){sendMsg(t,nick(uid)+'님이 도착했어요',true);toast('도착을 알렸어요');}
+function submitReview(t){
+  var rv0=S.rv||{};if(membersOf(t).some(function(id){var r=rv0[id];return id!==uid&&!(r&&(r.ns||r.score));})){toast('수저를 골라 평가해 주세요');return;}
+  var rv=S.rv||{},items=Object.assign({},(reviews[uid]&&reviews[uid].items)||{}),nsItems=Object.assign({},(noshows[uid]&&noshows[uid].items)||{}),anyNs=false,any=false;
+  membersOf(t).filter(function(id){return id!==uid;}).forEach(function(id){
+    var r=rv[id]||{tags:[],again:false,ns:false},k=reviewKey(t,id);
+    if(r.ns){nsItems[k]={tableId:t.id,target:id,at:Date.now()};anyNs=true;}
+    else{items[k]={tableId:t.id,target:id,score:Math.max(1,Math.min(5,r.score|0)),tags:(r.tags||[]).slice(0,5),again:!!r.again,at:Date.now()};}
+    any=true;
+  });
+  if(!any)return;
+  var cut=Date.now()-180*864e5;[items,nsItems].forEach(function(o){Object.keys(o).forEach(function(k){if((o[k].at||0)<cut)delete o[k];});});
+  S.busy=true;render();
+  var p=db.doc('reviews/'+uid).set({items:items});
+  if(anyNs)p=p.then(function(){return db.doc('noshows/'+uid).set({items:nsItems});});
+  p.then(function(){S.busy=false;S.rv=null;S.screen='my';toast('후기를 남겼어요. 고마워요!');}).catch(fail);
+}
+function toggleBlock(id){var i=priv.blocks.indexOf(id);if(i>=0){priv.blocks.splice(i,1);toast('차단을 풀었어요');}else{priv.blocks.push(id);toast(nick(id)+'님을 차단했어요');}S.memMenu=null;savePriv();render();}
+function addAd(){var f=S.adForm;if(!f.name.trim()){toast('가게 이름을 입력해 주세요');return;}S.busy=true;render();
+  db.collection('ads').add({name:f.name.trim().slice(0,40),area:f.area,menu:f.menu,copy:f.copy.trim().slice(0,200),perk:f.perk.trim().slice(0,60),addr:f.addr.trim().slice(0,80),createdAt:Date.now()})
+  .then(function(){S.busy=false;S.adForm=null;S.screen='my';toast('광고를 등록했어요');}).catch(function(e){S.busy=false;toast(e&&e.code==='invalid_argument'?'광고는 관리자만 등록할 수 있어요':'등록하지 못했어요');});}
+function delAd(id){db.collection('ads').doc(id).delete().then(function(){toast('광고를 내렸어요');}).catch(function(){toast('삭제하지 못했어요');});}
+
+// ---------- view helpers ----------
+function chips(list,cur,act,multi){return list.map(function(v){var val=Array.isArray(v)?v[0]:v,lab=Array.isArray(v)?v[1]:v,on=multi?(cur||[]).indexOf(val)>=0:cur===val;return '<button class="chip'+(on?' on':'')+'" data-act="'+act+'" data-v="'+esc(val)+'" aria-pressed="'+(on?'true':'false')+'">'+esc(lab)+'</button>';}).join('');}
+function checkRow(act,on,label){return '<button class="ckrow" data-act="'+act+'" aria-pressed="'+(on?'true':'false')+'"><span class="ck'+(on?' on':'')+'" aria-hidden="true">'+(on?'✓':'')+'</span><span>'+label+'</span></button>';}
+function modeTag(t){var k=t.mode==='talk'?'talk':'quiet';return '<span class="tag '+k+'">'+MODE[k]+'</span>';}
+function mannerChips(id,n){var m=mannerOf(id),sb=spoonBadge(id);if(!m.top.length&&!sb)return '';return '<div class="mtags">'+sb+m.top.slice(0,n||3).map(function(tg){return '<span class="mtag">'+esc(tg)+' '+m.counts[tg]+'</span>';}).join('')+'</div>';}
+function card(t,showWhy){
+  var n=membersOf(t).length,full=n>=t.capacity,mi=showWhy?matchInfo(t):null,u=unread(t),mr=myReq(t),mt=mannerOf(t.hostId);
+  var status=isMember(t)&&t.hostId!==uid?'<span class="tag ok">참여 확정</span>':(mr&&mr.status==='pending'?'<span class="tag">수락 대기</span>':'');
+  if(t.hostId===uid){var pc=pendingOf(t).length;status='<span class="tag ok">내 밥약</span>'+(pc?'<span class="tag new">신청 '+pc+'</span>':'');}
+  if(needsReview(t))status+='<span class="tag new">후기 남기기</span>';
+  return '<button class="card" data-act="open" data-id="'+esc(t.id)+'">'+
+   '<span class="thumb" style="background:'+(TINTS[t.menu]||'#F1E6D2')+'">'+esc(t.menu)+'</span>'+
+   '<span class="cbody">'+(mi&&mi.why.length?'<span class="reason">'+esc(mi.why.join(' · '))+'</span>':'')+
+   '<span class="muted">'+esc(t.area)+' · '+(t.place?esc(t.place):'식당은 채팅에서 정해요')+'</span>'+
+   '<span class="ctitle">'+esc(t.title)+'</span>'+
+   '<span class="tags">'+(t.quick?'<span class="tag bolt">번개</span>':'')+modeTag(t)+'<span class="tag">'+dayLabel(t.date)+' '+timeLabel(t)+'</span>'+(t.genderOnly?'<span class="tag g">'+GL[t.genderOnly]+'만</span>':'')+(ageRangeTxt(t)?'<span class="tag g">'+esc(ageRangeTxt(t))+'</span>':'')+(full?'<span class="tag full">모집 완료</span>':'')+status+(u?'<span class="tag new">새 메시지 '+u+'</span>':'')+'</span>'+
+   '<span class="hostline">'+esc(nick(t.hostId))+' · '+esc(gTxt(t.hostId))+(ageOf(t.hostId)?' · '+esc(ageOf(t.hostId)):'')+(mt.top[0]?' · '+esc(mt.top[0]):'')+'</span>'+
+   '<span class="cnt">'+n+'/'+t.capacity+'명 · 각자 결제</span></span></button>';
+}
+function adCard(a){return '<button class="adc" data-act="openAd" data-id="'+esc(a._id)+'"><span class="adth" style="background:'+(TINTS[a.menu]||'#F1E6D2')+'">'+esc(a.menu||'')+'</span><span class="adb"><span class="adl">광고</span><b>'+esc(a.name)+'</b><span class="muted">'+esc(a.area||'')+'</span>'+(a.perk?'<span class="adp">'+esc(a.perk)+'</span>':'')+'</span></button>';}
+function notes(){
+  var u=myRestriction(),h='';
+  if(u)h+='<div class="banner2 red">'+(isBanned(uid)?'운영 정책에 따라 ':'노쇼 신고가 '+NS_LIMIT+'회 쌓여 ')+fmtDate(u)+'까지 밥약을 열거나 신청할 수 없어요.</div>';
+  if(readOnly||canWrite===false)h+='<div class="banner2">지금은 둘러보기만 할 수 있어요. 함께 쓰려면 공유한 사람에게 편집 권한을 요청해 주세요.</div>';
+  return h;
+}
+function topBar(title,back){return '<div class="top">'+(back?'<button class="iconbtn" data-act="back" aria-label="뒤로">'+ICON.back+'</button>':'<span style="width:16px"></span>')+'<h1>'+title+'</h1></div>';}
+
+// ---------- screens ----------
+function needOnboard(){return db&&uid&&privLoaded&&loaded.p&&!priv.agreedAt&&!(readOnly||canWrite===false);}
+function obOk(o){return !!(o.nick.trim()&&o.gender&&validBy(o.by)&&o.area&&o.purposes.length&&o.age&&o.agree);}
+function vOnboard(){
+  var o=S.ob||(S.ob={nick:me().nick||'',gender:me().gender||null,by:me().birthYear?String(me().birthYear):'',diets:(me().diets||[]).slice(),foods:(me().foods||[]).slice(),photo:me().photo||null,area:me().area||'상도동',purposes:(me().purposes||[]).slice(),age:false,agree:false});
+  var ok=obOk(o);
+  return '<main class="main" id="main"><div style="padding:40px 22px 20px;display:flex;flex-direction:column;gap:22px">'+
+   '<div><div class="brand" style="color:var(--accent)">'+LOGO.replace('width="34" height="17"','width="56" height="28"')+'<b style="font-size:28px">Co-Meal</b></div><div style="font-size:22px;font-weight:800;line-height:1.4;margin-top:12px">우리 동네에서 시작되는<br>가장 가벼운 한 끼의 연결</div></div>'+
+   photoField(o.photo,'ob-photo','obPhotoRm')+
+   '<div class="field"><label for="ob-nick">닉네임</label><input class="inp" id="ob-nick" maxlength="12" placeholder="예: 상도 자취러" value="'+esc(o.nick)+'"></div>'+
+   '<div class="field"><span class="lbl">성별</span><div class="chips" style="margin:0">'+chips([['female','여성'],['male','남성']],o.gender,'obG')+'</div></div>'+
+   '<div class="field"><label for="ob-by">출생연도</label><input class="inp" id="ob-by" inputmode="numeric" maxlength="4" placeholder="예: 2003" value="'+esc(o.by)+'"><span class="muted" style="font-size:12px">다른 사람에게는 \'20대 중반\'처럼 연령대로만 보여요.</span></div>'+
+   '<div class="field"><span class="lbl">주로 밥 먹는 동네</span><div class="chips" style="margin:0">'+chips(AREAS,o.area,'obA')+'</div></div>'+
+   '<div class="field"><span class="lbl">코밀을 쓰는 이유 <span class="muted" style="font-weight:400">(여러 개 선택)</span></span><div class="chips" style="margin:0">'+chips(PURPOSES,o.purposes,'obP',true)+'</div><span class="muted" style="font-size:12px">이유가 겹치는 사람의 밥약을 먼저 보여드려요.</span></div>'+
+   '<div class="field"><span class="lbl">좋아하는 음식 <span class="muted" style="font-weight:400">(여러 개)</span></span><div class="chips" style="margin:0">'+chips(FOODS,o.foods,'obF',true)+'</div><span class="muted" style="font-size:12px">좋아하는 메뉴의 밥약을 먼저 보여드려요.</span></div>'+
+   '<div class="field"><span class="lbl">식습관 <span class="muted" style="font-weight:400">(선택 · 여러 개)</span></span><div class="chips" style="margin:0">'+chips(DIETS,o.diets,'obD',true)+'</div><span class="muted" style="font-size:12px">메뉴 고를 때 서로 참고할 수 있게 프로필에 보여요.</span></div>'+
+   '<div class="note" style="margin:0"><b>안심하고 이용하기 위한 약속</b>\n· 처음 만남은 식당·카페 같은 열린 곳에서만 해요.\n· 연락처, 주소 같은 개인정보는 충분히 알게 된 뒤에 나눠요.\n· 식사 후에는 서로 매너 평가를 남겨요. 노쇼 신고가 3회 쌓이면 14일 동안 이용이 제한돼요.</div>'+
+   '<div style="display:flex;flex-direction:column;gap:4px">'+checkRow('obAge',o.age,'만 19세 이상이에요')+checkRow('obAgree',o.agree,'위 약속을 지키고, 닉네임·성별·연령대·식습관·매너 평가가 다른 이용자에게 보이는 것에 동의해요')+'</div>'+
+  '</div></main><div class="bar"><button class="btn" data-act="obStart"'+(ok&&!S.busy?'':' disabled')+'>시작하기</button></div>';
+}
+function vHome(){
+  var m=me(),f=S.filter,live=tables.filter(upcoming).filter(visible);
+  var mine=live.filter(function(t){return t.hostId!==uid&&!isMember(t)&&!isFull(t)&&!gBlocked(t);});
+  var best=mine.map(function(t){return {t:t,s:matchInfo(t).score};}).filter(function(x){return x.s>=3;}).sort(function(a,b){return b.s-a.s||when(a.t)-when(b.t);}).slice(0,3).map(function(x){return x.t;});
+  var areaCnt=live.filter(function(t){return t.area===m.area;}).length;
+  var list=live.filter(function(t){return (f.mode==='all'||t.mode===f.mode)&&(f.menu==='전체'||t.menu===f.menu);}).sort(function(a,b){return when(a)-when(b);});
+  var body;
+  if(!loaded.t)body='<div class="empty"><span class="muted">'+(slow?'데이터에 아직 연결하지 못했어요. 잠시만 기다려 주세요.':'불러오는 중…')+'</span></div>';
+  else if(loadErr)body='<div class="empty"><b>데이터를 불러오지 못했어요</b><span class="muted">'+esc(loadErr)+'</span></div>';
+  else if(!list.length)body='<div class="empty"><b>'+(live.length?'조건에 맞는 밥약이 없어요':'아직 열린 밥약이 없어요')+'</b><span class="muted">첫 밥약을 열고 동네 밥친구를 모아 보세요</span><button class="pill" data-act="create">밥약 열기</button></div>';
+  else body=list.map(function(t){return card(t,false);}).join('');
+  return '<header class="hdr"><div class="brand" style="color:var(--accent)">'+LOGO+'<b>Co-Meal</b></div><button class="iconbtn" data-act="create" aria-label="밥약 열기">'+ICON.plus+'</button></header>'+
+   '<section class="hero"><div class="k">'+esc(m.area||'동작구')+' · 지금 열린 밥약 '+areaCnt+'개</div><div class="t">'+esc(nick(uid))+'님, 오늘은<br>누구랑 먹을까요?</div>'+
+    '<div class="acts"><button class="pill" data-act="quick">지금 먹을 사람 찾기</button><button class="pill light" data-act="nav" data-v="find">조건으로 찾기</button></div></section>'+
+   notes()+
+   (best.length?'<section class="sec" style="padding-top:8px"><div class="row"><h2>나랑 잘 맞는 밥약</h2><span class="muted">동네·이유가 겹쳐요</span></div></section><div class="list">'+best.map(function(t){return card(t,true);}).join('')+'</div><div class="sep"></div>':'')+
+   (ads.length?'<section class="sec"><div class="row"><h2>동네 맛집</h2><span class="muted">광고</span></div></section><div class="adrow">'+ads.map(adCard).join('')+'</div><div class="sep" style="margin-top:16px"></div>':'')+
+   '<section class="sec"><div class="row"><h2>전체 밥약</h2><span class="muted">'+(loaded.t?list.length+'개':'')+'</span></div>'+
+    '<div class="chips">'+chips([['all','전체'],['quiet','조용히 먹기'],['talk','대화하며 먹기']],f.mode,'fmode')+'</div>'+
+    '<div class="chips scroll">'+chips(['전체'].concat(MENUS.slice(0,8)),f.menu,'fmenu')+'</div></section>'+
+   '<div class="list">'+body+'</div>';
+}
+function vFind(){
+  var F=S.find;if(!F.area)F.area=me().area||'상도동';
+  var res=tables.filter(upcoming).filter(visible).filter(function(t){
+    return t.hostId!==uid&&!isMember(t)&&!isFull(t)&&!gBlocked(t)&&t.mode===F.mood&&slotOf(t.time)===F.slot&&(F.area==='동작구 전체'||t.area===F.area)&&(F.menu==='아무거나'||t.menu===F.menu)&&(!F.near||(function(){var a=ageIdx(uid),h=ageIdx(t.hostId);return a>=0&&h>=0&&Math.abs(a-h)<=1;})());
+  }).sort(function(a,b){return matchInfo(b).score-matchInfo(a).score||when(a)-when(b);});
+  return topBar('밥친구 찾기',false)+
+   '<div class="form" style="padding-top:4px"><div><div style="font-size:22px;font-weight:800;line-height:1.35">어떤 밥친구를<br>찾고 있나요?</div><div class="muted" style="margin-top:6px">조건이 맞는 밥약을, 나와 잘 맞는 순서로 보여드려요</div></div>'+
+   '<div class="field"><span class="lbl">식사 분위기</span><div class="mood">'+
+    '<button class="moodbtn'+(F.mood==='quiet'?' on':'')+'" data-act="fmood" data-v="quiet"><b>조용히 먹기</b><span>말 걸기 부담 없이, 각자 편하게 식사에 집중해요</span></button>'+
+    '<button class="moodbtn'+(F.mood==='talk'?' on':'')+'" data-act="fmood" data-v="talk"><b>대화하며 먹기</b><span>동네 이야기, 공부·자취 꿀팁을 나누며 먹어요</span></button></div></div>'+
+   '<div class="field"><span class="lbl">언제?</span><div class="chips" style="margin:0">'+chips(['점심','저녁','야식'],F.slot,'fslot')+'</div></div>'+
+   '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS,F.menu,'fmenu2')+'</div></div>'+
+   '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS.concat(['동작구 전체']),F.area,'farea2')+'</div></div>'+
+   '<div class="field"><span class="lbl">연령대</span><div class="chips" style="margin:0">'+chips([['all','상관없어요'],['near','비슷한 또래'+(ageOf(uid)?' ('+ageOf(uid)+' ±1)':'')]],F.near?'near':'all','fnear')+'</div></div></div>'+
+   '<div class="sep"></div><section class="sec"><div class="row"><h2>딱 맞는 밥약</h2><span class="muted">'+res.length+'개</span></div></section>'+
+   '<div class="list">'+(res.length?res.map(function(t){return card(t,true);}).join(''):
+     '<div class="empty"><b>아직 조건에 맞는 밥약이 없어요</b><span class="muted">이 조건 그대로 밥약을 열면, 같은 걸 찾는 이웃이 신청할 수 있어요</span><button class="pill" data-act="createFromFind">이 조건으로 밥약 열기</button></div>')+'</div>';
+}
+function newForm(pre){pre=pre||{};var d=new Date();var m=me();
+  return {title:'',area:pre.area&&pre.area!=='동작구 전체'?pre.area:(m.area||'상도동'),place:pre.place||'',menu:pre.menu||'한식',mode:pre.mood||'quiet',purposes:(m.purposes||[]).slice(0,1),date:ymd(d),time:pre.slot==='점심'?'12:30':(pre.slot==='야식'?'21:30':'19:00'),capacity:2,note:'',only:false,range:false,amin:Math.max(19,(ageNum(uid)||25)-3),amax:Math.min(70,(ageNum(uid)||25)+3),quick:!!pre.quick};}
+function vCreate(){
+  var f=S.form||(S.form=newForm());
+  return topBar(f.quick?'번개 밥약 열기':'밥약 열기',true)+notes()+
+  '<form class="form" id="cform" novalidate>'+
+   '<div class="field"><span class="lbl">언제 먹을까요?</span><div class="chips" style="margin:0">'+chips([['quick','지금 바로 (30분 안)'],['plan','날짜 정하기']],f.quick?'quick':'plan','cquick')+'</div></div>'+
+   (f.quick?'':'<div class="two"><div class="field"><label for="f-date">날짜</label><input class="inp" type="date" id="f-date" min="'+ymd(new Date())+'" value="'+esc(f.date)+'"></div><div class="field"><label for="f-time">시간</label><input class="inp" type="time" id="f-time" value="'+esc(f.time)+'"></div></div>')+
+   '<div class="field"><label for="f-title">한 줄 소개</label><input class="inp" id="f-title" maxlength="60" placeholder="예: 감자탕 같이 드실 분, 조용히 먹어요" value="'+esc(f.title)+'"></div>'+
+   '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS,f.menu,'cmenu')+'</div></div>'+
+   '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS,f.area,'carea')+'</div></div>'+
+   '<div class="field"><label for="f-place">식당 <span class="muted" style="font-weight:400">(선택 · 비워두면 채팅에서 정해요)</span></label><input class="inp" id="f-place" maxlength="40" placeholder="가고 싶은 식당이 있다면" value="'+esc(f.place)+'"></div>'+
+   '<div class="field"><span class="lbl">식사 분위기</span><div class="mood">'+
+    '<button type="button" class="moodbtn'+(f.mode==='quiet'?' on':'')+'" data-act="cmode" data-v="quiet"><b>조용히 먹기</b><span>대화는 최소로, 편하게 식사해요</span></button>'+
+    '<button type="button" class="moodbtn'+(f.mode==='talk'?' on':'')+'" data-act="cmode" data-v="talk"><b>대화하며 먹기</b><span>친구처럼 이야기 나누며 먹어요</span></button></div></div>'+
+   '<div class="field"><span class="lbl">이런 분이면 좋아요</span><div class="chips" style="margin:0">'+chips(PURPOSES,f.purposes,'cpur',true)+'</div></div>'+
+   '<div class="field"><span class="lbl">인원 (나 포함)</span><div class="stepper"><button type="button" data-act="cdec" aria-label="인원 줄이기">−</button><output>'+f.capacity+'명</output><button type="button" data-act="cinc" aria-label="인원 늘리기">+</button></div></div>'+
+   '<div class="field"><span class="lbl">참여 가능 성별</span><div class="chips" style="margin:0">'+chips([['any','누구나'],['same','같은 성별만'+(myGender()?' ('+GL[myGender()]+')':'')]],f.only?'same':'any','conly')+'</div></div>'+
+   '<div class="field"><span class="lbl">참여 가능 나이</span><div class="chips" style="margin:0">'+chips([['any','누구나'],['range','나이 정하기']],f.range?'range':'any','crange')+'</div>'+
+    (f.range?'<div class="two" style="margin-top:4px"><div class="field"><span class="muted">최소 나이</span><div class="stepper"><button type="button" data-act="cAminD" aria-label="최소 나이 줄이기">−</button><output>'+f.amin+'세</output><button type="button" data-act="cAminU" aria-label="최소 나이 늘리기">+</button></div></div><div class="field"><span class="muted">최대 나이</span><div class="stepper"><button type="button" data-act="cAmaxD" aria-label="최대 나이 줄이기">−</button><output>'+f.amax+'세</output><button type="button" data-act="cAmaxU" aria-label="최대 나이 늘리기">+</button></div></div></div><span class="muted" style="font-size:12px">'+f.amin+'세부터 '+f.amax+'세까지 신청할 수 있어요. 나이는 출생연도 기준이에요.</span>':'')+'</div>'+
+   '<div class="field"><label for="f-note">하고 싶은 말 <span class="muted" style="font-weight:400">(선택)</span></label><textarea class="inp" id="f-note" maxlength="300" placeholder="예: 맵기는 중간 정도, 각자 결제해요">'+esc(f.note)+'</textarea></div>'+
+  '</form>';
+}
+function stepsBar(t){
+  var mr=myReq(t),host=t.hostId===uid,ph=phase(t),mem=isMember(t)&&membersOf(t).length>1;
+  var st=[['신청',host?membersOf(t).length>1||pendingOf(t).length>0:!!mr],['매칭',mem],['채팅',mem&&messages.some(function(m){return m.tableId===t.id;})],['만남',mem&&(ph==='day'||ph==='after'||ph==='closed')],['평가',mem&&reviewedAll(t)&&ph!=='before'&&ph!=='day']];
+  var cur=-1;for(var i=0;i<st.length;i++){if(!st[i][1]){cur=i;break;}}
+  return '<div class="steps" aria-label="진행 단계">'+st.map(function(s,i){return '<span class="step'+(s[1]?' done':(i===cur?' on':''))+'">'+(i+1)+' '+s[0]+'</span>';}).join('')+'</div>';
+}
+function memberRow(t,id,i,host,mem){
+  var self=id===uid,nc=nsCount(id),bl=isBlockedUser(id),open=S.memMenu===id,p=prof(id);
+  var h='<div class="mrow"><div class="mem">'+avHtml(id)+'<div style="min-width:0"><div style="font-weight:700;font-size:14px">'+esc(nick(id))+(bl?' <span class="tag warn">차단함</span>':'')+'</div>'+
+    '<div class="muted">'+(i===0?'모집자':'참여자')+' · '+esc(infoLine(id))+(nc?' · <span style="color:#B3261E;font-weight:700">노쇼 '+nc+'회</span>':'')+'</div></div>'+
+    (self?'':'<button class="more" data-act="memMenu" data-id="'+esc(id)+'" aria-label="'+esc(nick(id))+' 옵션" aria-expanded="'+(open?'true':'false')+'">···</button>')+'</div>';
+  var dc=dietChips(id);if(dc)h+='<div style="padding-left:54px">'+dc+'</div>';
+  var mc=mannerChips(id,3);if(mc)h+='<div style="padding-left:54px">'+mc+'</div>';
+  if(open&&!self)h+='<div class="memact">'+(host&&i>0?'<button class="mbtn" data-act="kick" data-id="'+esc(id)+'">내보내기</button>':'')+'<button class="mbtn warn" data-act="block" data-id="'+esc(id)+'">'+(bl?'차단 해제':'차단하기')+'</button></div>';
+  return h+'</div>';
+}
+function vDetail(){
+  var t=byId(S.sel);
+  if(!t)return topBar('밥약',true)+'<div class="empty"><b>'+(loaded.t?'닫힌 밥약이에요':'불러오는 중…')+'</b></div>';
+  var ids=membersOf(t),mem=ids.indexOf(uid)>=0,host=t.hostId===uid,ph=phase(t),mr=myReq(t);
+  var msgs=messages.filter(function(m){return m.tableId===t.id&&!isBlockedUser(m.userId);}).sort(function(a,b){return a.at-b.at;});
+  var h=topBar('밥약',true)+'<div class="dhero" style="background:'+(TINTS[t.menu]||'#F1E6D2')+'">'+esc(t.menu)+'</div>'+stepsBar(t)+
+   '<div class="pad" style="display:flex;flex-direction:column;gap:8px;padding-top:14px"><span class="muted">'+esc(t.area)+' · '+(t.place?esc(t.place):'식당은 채팅에서 정해요')+'</span>'+
+   '<div style="font-size:21px;font-weight:800;line-height:1.35;word-break:keep-all">'+esc(t.title)+'</div>'+
+   '<div class="tags">'+(t.quick?'<span class="tag bolt">번개</span>':'')+modeTag(t)+(t.genderOnly?'<span class="tag g">'+GL[t.genderOnly]+'만</span>':'')+(ageRangeTxt(t)?'<span class="tag g">'+esc(ageRangeTxt(t))+'</span>':'')+(t.purposes||[]).map(function(p){return '<span class="tag">'+esc(p)+'</span>';}).join('')+(isFull(t)?'<span class="tag full">모집 완료</span>':'')+'</div></div>'+
+   '<div class="sep"></div><dl class="dl"><div><dt>일시</dt><dd>'+dayLabel(t.date)+' '+timeLabel(t)+'</dd></div><div><dt>인원</dt><dd>'+ids.length+'/'+t.capacity+'명</dd></div><div><dt>결제</dt><dd>각자 결제</dd></div></dl>'+
+   (t.note?'<div class="note">'+esc(t.note)+'</div>':'')+
+   (hasBlockedMember(t)?'<div class="banner2 red">내가 차단한 사용자가 이 밥약에 있어요.</div>':'')+
+   (mr&&mr.status==='pending'?'<div class="banner2">신청했어요. 모집자가 수락하면 채팅방이 열려요.</div>':'')+
+   (mr&&mr.status==='declined'?'<div class="banner2 red">이번 밥약은 매칭되지 않았어요. 다른 밥약을 찾아보세요.</div>':'');
+  if(host&&upcoming(t)){var pend=pendingOf(t);
+    h+='<h3 class="subh">신청한 사람 '+pend.length+'</h3><div class="members">'+(pend.length?pend.map(function(r){var p=prof(r.userId);
+      return '<div class="mrow"><div class="mem">'+avHtml(r.userId)+'<div style="min-width:0"><div style="font-weight:700;font-size:14px">'+esc(nick(r.userId))+'</div><div class="muted">'+esc(infoLine(r.userId))+((p.purposes||[]).length?' · '+esc(p.purposes.join(', ')):'')+(nsCount(r.userId)?' · <span style="color:#B3261E;font-weight:700">노쇼 '+nsCount(r.userId)+'회</span>':'')+'</div></div></div>'+
+       (r.msg?'<div class="note" style="margin:0 0 0 54px;padding:10px 12px">'+esc(r.msg)+'</div>':'')+(dietChips(r.userId)?'<div style="padding-left:54px">'+dietChips(r.userId)+'</div>':'')+(mannerChips(r.userId,3)?'<div style="padding-left:54px">'+mannerChips(r.userId,3)+'</div>':'')+
+       '<div class="memact"><button class="mbtn pri" data-act="accept" data-id="'+esc(r._id)+'"'+(S.busy||isFull(t)?' disabled':'')+'>수락</button><button class="mbtn" data-act="decline" data-id="'+esc(r._id)+'"'+(S.busy?' disabled':'')+'>거절</button></div></div>';}).join(''):'<span class="muted">아직 신청이 없어요. 신청이 오면 알려드려요.</span>')+'</div><div class="sep"></div>';}
+  h+='<h3 class="subh">함께 먹는 사람</h3><div class="members">'+ids.map(function(id,i){return memberRow(t,id,i,host,mem);}).join('')+'</div>';
+  if(mem){
+    h+='<div class="sep"></div><h3 class="subh">밥약 채팅</h3><div class="chat">'+(msgs.length?msgs.map(function(m){if(m.sys)return '<span class="sysmsg">'+esc(m.text)+'</span>';var mine=m.userId===uid;return '<div class="msg'+(mine?' me':'')+'">'+(mine?'':'<span class="who">'+esc(nick(m.userId))+'</span>')+'<span class="txt">'+esc(m.text)+'</span></div>';}).join(''):'<span class="muted">만날 식당과 장소를 정해 보세요</span>')+'</div>'+
+     '<div class="muted" style="padding:0 20px 8px;font-size:12px">처음 만날 땐 식당에서 만나고, 연락처는 충분히 알게 된 뒤에 나눠 주세요.</div>'+
+     (ph==='closed'?'':'<form class="chatin" id="chatform"><label class="sr" for="chat-in">메시지</label><input class="inp" id="chat-in" maxlength="300" placeholder="메시지 보내기" value="'+esc(S.draft)+'" autocomplete="off"><button class="btn sm" aria-label="보내기">'+ICON.send+'</button></form>');
+  }
+  if(host&&S.confirmDel)h+='<div class="confirm"><b>이 밥약을 닫을까요?</b><span class="muted">신청과 채팅도 함께 사라져요.</span><div class="acts"><button class="btn sm" data-act="delYes"'+(S.busy?' disabled':'')+'>닫기</button><button class="btn sm ghost" data-act="delNo">취소</button></div></div>';
+  if(!mem&&!host&&ph!=='closed'&&ph!=='after'&&(!mr||mr.status==='declined')&&!isFull(t)&&!gBlocked(t)&&!hasBlockedMember(t))h+='<div class="field" style="padding:16px 20px 8px"><label for="req-msg">모집자에게 한마디 <span class="muted" style="font-weight:400">(선택)</span></label><input class="inp" id="req-msg" maxlength="80" placeholder="예: 저도 조용히 먹는 거 좋아해요!" value="'+esc(S.reqMsg)+'"></div>';
+  return h;
+}
+function detailBar(){
+  var t=byId(S.sel);if(!t)return '';
+  var host=t.hostId===uid,mem=isMember(t),ph=phase(t),mr=myReq(t),dis=S.busy||readOnly||canWrite===false;
+  if(mem&&needsReview(t))return '<div class="bar"><button class="btn" data-act="review">식사는 어땠나요? 후기 남기기</button></div>';
+  if(host&&(ph==='before'||ph==='day')&&membersOf(t).length>1)return '<div class="bar" style="display:flex;gap:8px"><button class="btn ghost" style="flex:0 0 34%" data-act="'+(ph==='day'?'arrived':'delAsk')+'"'+(dis?' disabled':'')+'>'+(ph==='day'?'도착했어요':'밥약 닫기')+'</button><button class="btn" style="flex:1" data-act="endMeal"'+(dis?' disabled':'')+'>식사 끝! 수저 평가하기</button></div>';
+  if(mem&&ph==='day'&&membersOf(t).length>1)return '<div class="bar"><button class="btn" data-act="arrived"'+(dis?' disabled':'')+'>도착했어요</button></div>';
+  if(host&&ph==='day')return '<div class="bar"><button class="btn ghost" data-act="delAsk"'+(dis?' disabled':'')+'>밥약 닫기</button></div>';
+  if(host&&ph==='before')return '<div class="bar"><button class="btn ghost" data-act="delAsk"'+(dis?' disabled':'')+'>밥약 닫기</button></div>';
+  if(mem&&ph==='before')return '<div class="bar"><button class="btn ghost" data-act="cancelReq"'+(dis?' disabled':'')+'>참여 취소</button></div>';
+  if(mem)return '';
+  if(mr&&mr.status==='pending')return '<div class="bar"><button class="btn ghost" data-act="cancelReq"'+(dis?' disabled':'')+'>신청 취소</button></div>';
+  if(ph==='after'||ph==='closed')return '<div class="bar"><button class="btn" disabled>지난 밥약이에요</button></div>';
+  var rs=myRestriction(),hb=hasBlockedMember(t),gb=gBlocked(t),full=isFull(t);
+  var lab=full?'모집이 끝났어요':(rs?fmtDate(rs)+'까지 이용 제한':(hb?'차단한 사용자가 있어요':(gb?blockReason(t):'같이 먹기 신청')));
+  return '<div class="bar"><button class="btn" data-act="request"'+(dis||full||rs||hb||gb?' disabled':'')+'>'+lab+'</button></div>';
+}
+function vReview(){
+  var t=byId(S.sel);if(!t)return topBar('후기',true)+'<div class="empty"><b>밥약을 찾을 수 없어요</b></div>';
+  var rv=S.rv||(S.rv={});var others=membersOf(t).filter(function(id){return id!==uid;});
+  return topBar('식사 후기',true)+'<div class="pad" style="padding-bottom:4px"><div style="font-size:20px;font-weight:800;line-height:1.4">'+esc(t.title)+'</div><div class="muted" style="margin-top:4px">'+dayLabel(t.date)+' '+timeLabel(t)+' · 수저 평가는 상대의 프로필에 쌓여요</div></div>'+
+   others.map(function(id){var r=rv[id]||(rv[id]={tags:[],again:false,ns:false,score:0});
+    return '<div class="rv"><div class="mem">'+avHtml(id)+'<div><div style="font-weight:700">'+esc(nick(id))+'</div><div class="muted">'+esc(infoLine(id))+'</div></div></div>'+
+     (r.ns?'':'<div><div class="lbl" style="font-size:14px;font-weight:700;margin-bottom:6px">함께한 한 끼, 몇 수저인가요?</div><div class="spoons">'+[1,2,3,4,5].map(function(k){return '<button class="sp'+(r.score>=k?' on':'')+'" data-act="rvScore" data-id="'+esc(id)+'" data-v="'+k+'" aria-label="'+SPOON[k].n+'" aria-pressed="'+(r.score>=k)+'">'+spoonImg(k)+'</button>';}).join('')+'</div><div class="splab">'+(r.score?'<b>'+SPOON[r.score].l+'</b>':'수저를 눌러 평가해 주세요')+'</div></div>'+checkRow('rvAgain:'+id,r.again,'이 이웃과 또 같이 먹고 싶어요'))+
+     checkRow('rvNs:'+id,r.ns,'약속에 나오지 않았어요 (노쇼 신고)')+'</div>';}).join('');
+}
+function vMy(){
+  var m=me(),mt=mannerOf(uid),mineAll=tables.filter(function(t){return isMember(t);}).sort(function(a,b){return when(a)-when(b);});
+  var toReview=mineAll.filter(needsReview),up=mineAll.filter(function(t){return upcoming(t);}),past=mineAll.filter(function(t){return !upcoming(t)&&!needsReview(t);}).reverse().slice(0,10);
+  var pending=tables.filter(function(t){var r=myReq(t);return r&&r.status==='pending'&&upcoming(t);});
+  var e=S.edit;
+  var h=topBar('내 밥약',false)+notes()+
+   '<div class="pcard"><div class="mem">'+avHtml(uid)+'<div style="min-width:0"><div style="font-size:17px;font-weight:800">'+esc(nick(uid))+'</div><div class="muted">'+esc(infoLine(uid))+'</div></div><button class="mbtn" style="margin-left:auto" data-act="editProfile">'+(e?'닫기':'프로필 수정')+'</button></div>'+
+   ((m.purposes||[]).length?'<div class="tags">'+m.purposes.map(function(p){return '<span class="tag">'+esc(p)+'</span>';}).join('')+'</div>':'')+
+   dietChips(uid)+
+   (ageOf(uid)?'':'<div class="banner2" style="margin:0">출생연도를 설정하면 나이 조건이 있는 밥약에 참여할 수 있고 추천도 더 정확해져요.</div>')+
+   '<div class="muted" style="font-size:12px">받은 매너 평가 '+mt.n+'개'+''+' · 재매칭 희망 '+mt.again+'회 · 노쇼 '+nsCount(uid)+'회</div>'+(mannerChips(uid,5)||'')+'</div>';
+  if(e)h+='<div class="form" style="padding-top:16px">'+photoField(e.photo,'e-photo','ePhotoRm')+'<div class="field"><label for="e-nick">닉네임</label><input class="inp" id="e-nick" maxlength="12" value="'+esc(e.nick)+'"></div>'+
+    '<div class="field"><span class="lbl">성별</span><div class="chips" style="margin:0">'+chips([['female','여성'],['male','남성']],e.gender,'eG')+'</div></div>'+
+    '<div class="field"><label for="e-by">출생연도</label><input class="inp" id="e-by" inputmode="numeric" maxlength="4" placeholder="예: 2003" value="'+esc(e.by)+'"></div>'+
+    '<div class="field"><span class="lbl">주로 밥 먹는 동네</span><div class="chips" style="margin:0">'+chips(AREAS,e.area,'eA')+'</div></div>'+
+    '<div class="field"><span class="lbl">코밀을 쓰는 이유</span><div class="chips" style="margin:0">'+chips(PURPOSES,e.purposes,'eP',true)+'</div></div>'+
+    '<div class="field"><span class="lbl">좋아하는 음식</span><div class="chips" style="margin:0">'+chips(FOODS,e.foods,'eF',true)+'</div></div>'+
+    '<div class="field"><span class="lbl">식습관</span><div class="chips" style="margin:0">'+chips(DIETS,e.diets,'eD',true)+'</div></div>'+
+    '<button class="btn" data-act="saveProfile">저장</button></div>';
+  h+=(toReview.length?'<section class="sec"><div class="row"><h2>후기를 기다려요</h2><span class="muted">48시간 안에</span></div></section><div class="list">'+toReview.map(function(t){return card(t,false);}).join('')+'</div><div class="sep"></div>':'')+
+   '<section class="sec"><h2>다가오는 밥약</h2></section><div class="list">'+(up.length?up.map(function(t){return card(t,false);}).join(''):'<div class="empty"><b>아직 잡힌 밥약이 없어요</b><span class="muted">나랑 맞는 밥약에 신청하거나 직접 열어 보세요</span><button class="pill" data-act="nav" data-v="find">밥친구 찾기</button></div>')+'</div>'+
+   (pending.length?'<div class="sep"></div><section class="sec"><h2>수락을 기다리는 신청</h2></section><div class="list">'+pending.map(function(t){return card(t,false);}).join('')+'</div>':'')+
+   (past.length?'<div class="sep"></div><section class="sec"><h2>지난 밥약</h2></section><div class="list">'+past.map(function(t){return card(t,false);}).join('')+'</div>':'')+
+   '<div class="sep"></div><section class="sec"><h2>차단한 사용자</h2><div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">'+(priv.blocks.length?priv.blocks.map(function(id){return '<div class="mem">'+avHtml(id)+'<div style="font-weight:700;font-size:14px">'+esc(nick(id))+'</div><button class="mbtn" style="margin-left:auto" data-act="block" data-id="'+esc(id)+'">차단 해제</button></div>';}).join(''):'<span class="muted">없어요</span>')+'</div></section>';
+  return h+'<div class="muted" style="text-align:center;font-size:12px;padding:28px 0 24px">한 끼를 위한 가장 가벼운 연결, 코밀</div>';
+}
+function vAd(){
+  var a=ads.filter(function(x){return x._id===S.adSel;})[0];
+  if(!a)return topBar('동네 맛집',true)+'<div class="empty"><b>광고가 끝났어요</b></div>';
+  var here=tables.filter(upcoming).filter(visible).filter(function(t){return t.place===a.name;});
+  return topBar('동네 맛집',true)+'<div class="dhero" style="background:'+(TINTS[a.menu]||'#F1E6D2')+'">'+esc(a.menu||'')+'</div>'+
+   '<div class="pad" style="display:flex;flex-direction:column;gap:8px"><span class="adl">광고</span><div style="font-size:22px;font-weight:800">'+esc(a.name)+'</div><span class="muted">'+esc(a.area||'')+' · '+esc(a.menu||'')+'</span></div>'+
+   (a.copy?'<div class="note">'+esc(a.copy)+'</div>':'')+(a.perk?'<div class="perk"><b>코밀로 같이 오면</b><span>'+esc(a.perk)+'</span></div>':'')+(a.addr?'<dl class="dl"><div><dt>위치</dt><dd>'+esc(a.addr)+'</dd></div></dl>':'')+
+   '<div class="sep"></div><section class="sec"><h2>이 가게 밥약</h2></section><div class="list">'+(here.length?here.map(function(t){return card(t,false);}).join(''):'<div class="empty"><span class="muted">아직 열린 밥약이 없어요.</span></div>')+'</div>';
+}
+function vAdNew(){
+  var f=S.adForm||(S.adForm={name:'',area:'상도동',menu:'한식',copy:'',perk:'',addr:''});
+  return topBar('광고 등록',true)+'<form class="form" id="adform" novalidate>'+
+   '<div class="field"><label for="a-name">가게 이름</label><input class="inp" id="a-name" maxlength="40" value="'+esc(f.name)+'"></div>'+
+   '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS,f.area,'aarea')+'</div></div>'+
+   '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS.slice(0,8),f.menu,'amenu')+'</div></div>'+
+   '<div class="field"><label for="a-copy">소개 문구</label><textarea class="inp" id="a-copy" maxlength="200">'+esc(f.copy)+'</textarea></div>'+
+   '<div class="field"><label for="a-perk">코밀 손님 혜택</label><input class="inp" id="a-perk" maxlength="60" placeholder="예: 음료 1잔 서비스" value="'+esc(f.perk)+'"></div>'+
+   '<div class="field"><label for="a-addr">위치 <span class="muted" style="font-weight:400">(선택)</span></label><input class="inp" id="a-addr" maxlength="80" value="'+esc(f.addr)+'"></div></form>';
+}
+function nav(){
+  var s=S.screen,b=myBadge();
+  function it(k,ic,lab,on){var bd=k==='my'&&b?'<span class="badge" aria-label="확인할 알림 '+b+'개">'+(b>99?'99+':b)+'</span>':'';return '<button data-act="nav" data-v="'+k+'" class="'+(on?'on':'')+'"'+(on?' aria-current="page"':'')+'>'+ic+bd+'<span>'+lab+'</span></button>';}
+  return '<nav class="nav" aria-label="하단 메뉴">'+it('home',ICON.home,'홈',s==='home')+it('find',ICON.find,'밥친구 찾기',s==='find')+it('create',ICON.add,'밥약 열기',s==='create')+it('my',ICON.my,'내 밥약',s==='my')+'</nav>';
+}
+
+// ---------- admin ----------
+function isAdminRoute(){return APP_MODE==='admin';}
+function aTabs(){var tabs=[['dash','대시보드'],['tables','밥약 관리'],['users','사용자 관리'],['reports','신고 처리'],['ads','광고 관리']];
+  return '<nav class="atabs" aria-label="관리 메뉴">'+tabs.map(function(x){var on=(S.atab||'dash')===x[0];return '<button class="atab'+(on?' on':'')+'" data-act="a_tab" data-v="'+x[0]+'"'+(on?' aria-current="page"':'')+'>'+x[1]+'</button>';}).join('')+'</nav>';}
+function nsAll(){var out=[];Object.keys(noshows).forEach(function(by){var it=(noshows[by]&&noshows[by].items)||{};Object.keys(it).forEach(function(k){var r=it[k];if(r&&r.target)out.push({by:by,k:k,r:r,dis:isDismissed(by,k)});});});return out.sort(function(a,b){return (b.r.at||0)-(a.r.at||0);});}
+function reviewCount(){return Object.keys(reviews).reduce(function(n,by){return n+Object.keys((reviews[by]&&reviews[by].items)||{}).length;},0);}
+function stat(label,val){return '<div class="stat">'+label+'<b>'+val+'</b></div>';}
+function aConfirmBtn(act,id,label,warn){var c=S.aConfirm===act+id;return '<button class="mbtn'+(warn?' warn':'')+(c?' pri':'')+'" data-act="'+act+'" data-id="'+esc(id)+'">'+(c?'한 번 더 눌러 확인':label)+'</button>';}
+function vAdmin(){
+  var tab=S.atab||'dash',h='';
+  if(tab==='dash'){
+    var users=Object.keys(profiles),open=tables.filter(upcoming),acc=reqs.filter(function(r){return r.status==='accepted';}).length,pend=reqs.filter(function(r){return r.status==='pending';}).length;
+    var nsv=nsAll().filter(function(x){return !x.dis;}).length,restr=users.filter(function(id){return restrictedUntil(id);}).length;
+    h+='<div class="stats">'+stat('가입자',users.length+'명')+stat('지금 열린 밥약',open.length+'개')+stat('성사된 매칭',acc+'건')+stat('수락 대기 신청',pend+'건')+stat('매너 후기',reviewCount()+'개')+stat('유효 노쇼 신고',nsv+'건')+stat('이용 제한 중',restr+'명')+'</div>';
+    h+='<h2 class="ah2">동네별 열린 밥약</h2><div class="tblwrap"><table class="tbl"><thead><tr><th>동네</th><th>열린 밥약</th><th>수락 대기 신청</th><th>가입자(주 동네)</th></tr></thead><tbody>'+
+      AREAS.map(function(a){var ot=open.filter(function(t){return t.area===a;});return '<tr><td>'+a+'</td><td>'+ot.length+'</td><td>'+ot.reduce(function(n,t){return n+pendingOf(t).length;},0)+'</td><td>'+users.filter(function(id){return prof(id).area===a;}).length+'</td></tr>';}).join('')+'</tbody></table></div>';
+  } else if(tab==='tables'){
+    var ts=tables.slice().sort(function(a,b){return (upcoming(b)-upcoming(a))||when(a)-when(b);});
+    h+='<h2 class="ah2">전체 밥약 '+ts.length+'개</h2>'+(ts.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>일시</th><th>제목</th><th>동네 · 메뉴</th><th>모집자</th><th>인원</th><th>대기</th><th>상태</th><th></th></tr></thead><tbody>'+
+      ts.map(function(t){return '<tr><td>'+dayLabel(t.date)+' '+timeLabel(t)+'</td><td><b>'+esc(t.title)+'</b></td><td>'+esc(t.area)+' · '+esc(t.menu)+'</td><td>'+esc(nick(t.hostId))+'</td><td>'+membersOf(t).length+'/'+t.capacity+'</td><td>'+pendingOf(t).length+'</td><td>'+(upcoming(t)?'진행 예정':'지난 밥약')+'</td><td>'+aConfirmBtn('a_close',t.id,'닫기',true)+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">아직 밥약이 없어요.</p>');
+  } else if(tab==='users'){
+    var us=Object.keys(profiles).sort(function(a,b){return (restrictedUntil(b)?1:0)-(restrictedUntil(a)?1:0)||nsCount(b)-nsCount(a);});
+    h+='<h2 class="ah2">사용자 '+us.length+'명</h2>'+(us.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>닉네임</th><th>성별 · 연령대 · 동네</th><th>매너 후기</th><th>유효 노쇼</th><th>상태</th><th>관리</th></tr></thead><tbody>'+
+      us.map(function(id){var mt=mannerOf(id),ru=restrictedUntil(id),bn=isBanned(id);return '<tr><td><b>'+esc(nick(id))+'</b></td><td>'+esc(infoLine(id))+'</td><td>'+mt.n+'개'+(mt.sc?' · '+spoonImg(spoonLv(mt)).replace('<img ','<img style="height:18px;vertical-align:middle" ')+' '+mt.avg.toFixed(1):'')+(mt.top[0]?' · '+esc(mt.top[0]):'')+'</td><td>'+nsCount(id)+'회</td><td>'+(ru?'<span class="tag warn">'+fmtDate(ru)+'까지 제한'+(bn?' (운영자)':' (노쇼)')+'</span>':'<span class="tag ok">정상</span>')+'</td><td style="white-space:nowrap">'+
+        (bn?'<button class="mbtn" data-act="a_unban" data-id="'+esc(id)+'">제한 해제</button>':'<button class="mbtn warn" data-act="a_ban7" data-id="'+esc(id)+'">7일 제한</button> <button class="mbtn warn" data-act="a_ban30" data-id="'+esc(id)+'">30일 제한</button>')+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">아직 가입자가 없어요.</p>');
+    h+='<p class="muted" style="margin-top:12px">노쇼 신고가 '+NS_LIMIT+'회 쌓이면 자동으로 '+NS_DAYS+'일 제한돼요. 운영자 제한은 신고와 별개로 걸 수 있어요.</p>';
+  } else if(tab==='reports'){
+    var rs=nsAll();
+    h+='<h2 class="ah2">노쇼 신고 '+rs.length+'건</h2>'+(rs.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>신고일</th><th>신고한 사람</th><th>신고된 사람</th><th>밥약</th><th>상태</th><th></th></tr></thead><tbody>'+
+      rs.map(function(x){var t=byId(x.r.tableId);return '<tr><td>'+fmtDate(x.r.at||0)+'</td><td>'+esc(nick(x.by))+'</td><td><b>'+esc(nick(x.r.target))+'</b> (누적 '+nsCount(x.r.target)+'회)</td><td>'+(t?esc(t.title):'<span class="muted">닫힌 밥약</span>')+'</td><td>'+(x.dis?'<span class="tag">무효 처리됨</span>':'<span class="tag warn">유효</span>')+'</td><td><button class="mbtn" data-act="a_dismiss" data-id="'+esc(safeId(x.by)+'|'+x.k)+'">'+(x.dis?'다시 유효로':'무효 처리')+'</button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">들어온 신고가 없어요.</p>');
+    h+='<p class="muted" style="margin-top:12px">허위 신고로 판단되면 무효 처리하세요. 무효 처리된 신고는 누적 횟수와 자동 제한에서 빠져요.</p>';
+  } else if(tab==='ads'){
+    var f=S.aAd||(S.aAd={name:'',area:'상도동',menu:'한식',copy:'',perk:'',addr:''});
+    h+='<h2 class="ah2">동네 맛집 광고 등록</h2><form class="aform" id="aadform" novalidate>'+
+     '<div class="field"><label for="ad-name">가게 이름</label><input class="inp" id="ad-name" maxlength="40" value="'+esc(f.name)+'"></div>'+
+     '<div class="field"><label for="ad-perk">코밀 손님 혜택</label><input class="inp" id="ad-perk" maxlength="60" placeholder="예: 음료 1잔 서비스" value="'+esc(f.perk)+'"></div>'+
+     '<div class="field"><label for="ad-addr">위치 (선택)</label><input class="inp" id="ad-addr" maxlength="80" value="'+esc(f.addr)+'"></div>'+
+     '<div class="field"><label for="ad-copy">소개 문구</label><textarea class="inp" id="ad-copy" maxlength="200">'+esc(f.copy)+'</textarea></div>'+
+     '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS,f.area,'a_adArea')+'</div></div>'+
+     '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS.slice(0,8),f.menu,'a_adMenu')+'</div></div>'+
+     '<div><button class="btn" style="max-width:240px" data-act="a_adAdd"'+(S.busy?' disabled':'')+'>광고 등록</button></div></form>'+
+     '<h2 class="ah2">등록된 광고 '+ads.length+'개</h2>'+(ads.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>가게</th><th>동네 · 메뉴</th><th>혜택</th><th>등록일</th><th></th></tr></thead><tbody>'+
+      ads.map(function(a){return '<tr><td><b>'+esc(a.name)+'</b></td><td>'+esc(a.area||'')+' · '+esc(a.menu||'')+'</td><td>'+esc(a.perk||'')+'</td><td>'+fmtDate(a.createdAt||0)+'</td><td>'+aConfirmBtn('a_adDel',a._id,'내리기',true)+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">등록된 광고가 없어요.</p>');
+  }
+  return '<header class="ahdr"><div class="brand" style="color:var(--accent)">'+LOGO+'<b>Co-Meal</b><span class="tag" style="margin-left:6px">관리자</span></div><span style="display:flex;gap:8px"><button class="mbtn" data-act="a_exit">참여자 앱 보기</button><button class="mbtn" data-act="a_logout">로그아웃</button></span></header>'+aTabs()+'<div class="adm">'+notesAdmin()+h+'</div>';
+}
+function vLogin(){
+  var lg=S.lg||(S.lg={email:'',pw:''});
+  var body;
+  if(!dbChecked)body='<span class="muted">연결 중…</span>';
+  else if(loadErr)body='<b>'+esc(loadErr)+'</b>';
+  else if(authUser&&!adminChecked)body='<span class="muted">권한 확인 중…</span>';
+  else if(authUser&&!amAdmin)body='<b>관리자 권한이 없는 계정이에요</b><span class="muted">Firebase 콘솔의 admins 컬렉션에 이 계정의 UID를 추가해야 해요.</span><span class="muted" style="font-size:12px">UID: '+esc(authUser.uid)+'</span><button class="mbtn" data-act="a_logout">로그아웃</button>';
+  else body='<form id="lgform" style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;text-align:left" novalidate><div class="field"><label for="lg-email">관리자 이메일</label><input class="inp" id="lg-email" type="email" autocomplete="username" value="'+esc(lg.email)+'"></div><div class="field"><label for="lg-pw">비밀번호</label><input class="inp" id="lg-pw" type="password" autocomplete="current-password"></div><button class="btn" data-act="a_login">로그인</button></form>';
+  return '<div class="empty" style="padding-top:80px"><div class="brand" style="color:var(--accent);justify-content:center">'+LOGO+'<b>Co-Meal</b><span class="tag" style="margin-left:6px">관리자</span></div>'+body+'</div>';
+}
+function notesAdmin(){return (readOnly||canWrite===false)?'<div class="banner2" style="margin:0 0 16px">이 계정은 데이터를 바꿀 권한이 없어요.</div>':'';}
+function aBan(id,days){S.aConfirm=null;db.doc('bans/'+safeId(id)).set({userId:id,until:Date.now()+days*864e5,at:Date.now(),reason:'운영자 제한'}).then(function(){toast(nick(id)+'님을 '+days+'일 제한했어요');}).catch(fail);}
+function aUnban(id){db.doc('bans/'+safeId(id)).delete().then(function(){toast('제한을 풀었어요');}).catch(fail);}
+function aDismiss(key){var d=Object.assign({},moder.dismissed||{});if(d[key])delete d[key];else d[key]=true;moder.dismissed=d;render();db.doc('moderation/noshow').set({dismissed:d,updatedAt:Date.now()}).then(function(){toast('신고 상태를 바꿨어요');}).catch(fail);}
+function aAdAdd(){var f=S.aAd;if(!f.name.trim()){toast('가게 이름을 입력해 주세요');return;}S.busy=true;render();
+  db.collection('ads').add({name:f.name.trim().slice(0,40),area:f.area,menu:f.menu,copy:f.copy.trim().slice(0,200),perk:f.perk.trim().slice(0,60),addr:f.addr.trim().slice(0,80),createdAt:Date.now()})
+  .then(function(){S.busy=false;S.aAd=null;toast('광고를 등록했어요');}).catch(fail);}
+function aCloseTable(id){var t=byId(id);if(t)closeTable(t);S.screen='home';}
+function adminClick(a,v,id){
+  var two=function(act){if(S.aConfirm===act+id){S.aConfirm=null;return true;}S.aConfirm=act+id;render();return false;};
+  switch(a){
+    case 'a_tab':S.atab=v;S.aConfirm=null;render();return true;
+    case 'a_exit':location.href='index.html';return true;
+    case 'a_login':var lg=S.lg||{};if(!lg.email||!lg.pw){toast('이메일과 비밀번호를 입력해 주세요');return true;}FB.auth.signInWithEmailAndPassword(lg.email.trim(),lg.pw).catch(function(){toast('로그인하지 못했어요. 이메일·비밀번호를 확인해 주세요');});return true;
+    case 'a_logout':FB.auth.signOut().then(function(){location.reload();});return true;
+    case 'a_close':if(two('a_close'))aCloseTable(id);return true;
+    case 'a_ban7':aBan(id,7);return true;
+    case 'a_ban30':aBan(id,30);return true;
+    case 'a_unban':aUnban(id);return true;
+    case 'a_dismiss':aDismiss(id);return true;
+    case 'a_adArea':S.aAd.area=v;render();return true;
+    case 'a_adMenu':S.aAd.menu=v;render();return true;
+    case 'a_adAdd':aAdAdd();return true;
+    case 'a_adDel':if(two('a_adDel'))delAd(id);return true;
+  }
+  return false;
+}
+
+// ---------- render ----------
+var lastScreen=null;
+function render(){
+  var app=document.getElementById('app');
+  var ae=document.activeElement,fid=ae&&ae.id,ss=null,se=null;try{if(fid&&ae.setSelectionRange){ss=ae.selectionStart;se=ae.selectionEnd;}}catch(e){}
+  var main=document.getElementById('main'),st=main?main.scrollTop:0;
+  var extra=(S.toast?'<div class="toast" role="status">'+esc(S.toast)+'</div>':'')+(S.notice?'<button class="notice" data-act="open" data-id="'+esc(S.notice.tid)+'"><span style="font-size:12px;color:#F2C9B8;font-weight:700">'+esc(S.notice.title)+'</span><span style="font-size:14px">'+esc(S.notice.body)+'</span></button>':'');
+  if(isAdminRoute()&&!db){app.className='app wide';app.innerHTML='<main class="main" id="main">'+vLogin()+'</main>'+(S.toast?'<div class="toast" role="status">'+esc(S.toast)+'</div>':'');return;}
+  if(!db){app.innerHTML='<main class="main" id="main"><div class="empty"><b>'+(loadErr?esc(loadErr):'<span style="color:#C4401F;font-size:22px">Co-Meal</span>')+'</b>'+(loadErr?'':'<span class="muted">한 끼를 위한 가장 가벼운 연결</span>')+'</div></main>';return;}
+  var v,bar='',navOn=true;
+  if(isAdminRoute()){
+    app.className='app wide';
+    if(!adminChecked)v='<div class="empty"><span class="muted">권한 확인 중…</span></div>';
+    else if(!amAdmin)v='<div class="empty"><b>관리자만 볼 수 있는 화면이에요</b><span class="muted">밥약에 참여하려면 참여자 앱을 이용해 주세요.</span><button class="pill" data-act="a_exit">참여자 앱으로</button></div>';
+    else v=vAdmin();
+    app.innerHTML='<main class="main" id="main">'+v+'</main>'+(S.toast?'<div class="toast" role="status">'+esc(S.toast)+'</div>':'');
+    restore();return;
+  }
+  app.className='app';
+  if(needOnboard()){v=vOnboard();app.innerHTML=v+extra;restore();return;}
+  if(S.screen==='home')v=vHome();
+  else if(S.screen==='find')v=vFind();
+  else if(S.screen==='create'){v=vCreate();navOn=false;bar='<div class="bar"><button class="btn" data-act="submit"'+(S.busy||readOnly||canWrite===false?' disabled':'')+'>'+(S.busy?'여는 중…':(S.form&&S.form.quick?'번개 밥약 열기':'밥약 열기'))+'</button></div>';}
+  else if(S.screen==='detail'){v=vDetail();bar=detailBar();navOn=false;}
+  else if(S.screen==='review'){v=vReview();navOn=false;bar='<div class="bar"><button class="btn" data-act="rvSubmit"'+(S.busy?' disabled':'')+'>후기 보내기</button></div>';}
+  else if(S.screen==='ad'){v=vAd();navOn=false;var ad=ads.filter(function(x){return x._id===S.adSel;})[0];bar=ad?'<div class="bar"><button class="btn" data-act="adTable">이 가게로 밥약 열기</button></div>':'';}
+  else if(S.screen==='adNew'){v=vAdNew();navOn=false;bar='<div class="bar"><button class="btn" data-act="adSubmit"'+(S.busy?' disabled':'')+'>광고 등록</button></div>';}
+  else v=vMy();
+  app.innerHTML='<main class="main" id="main">'+v+'</main>'+bar+(navOn?nav():'')+extra;
+  restore();
+  function restore(){
+    var m2=document.getElementById('main');
+    if(m2){if(lastScreen===S.screen+(S.sel||''))m2.scrollTop=st;else m2.scrollTop=0;}
+    lastScreen=S.screen+(S.sel||'');
+    if(fid){var el=document.getElementById(fid);if(el){el.focus();try{if(ss!=null)el.setSelectionRange(ss,se);}catch(e){}}}
+  }
+}
+
+// ---------- events ----------
+function toggleIn(arr,v){var i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var a=b.getAttribute('data-act'),v=b.getAttribute('data-v'),id=b.getAttribute('data-id'),t=byId(S.sel);
+  if(a.indexOf('a_')===0){e.preventDefault();if(adminClick(a,v,id))return;}
+  if(a.indexOf('rvAgain:')===0){var ida=a.slice(8);S.rv[ida].again=!S.rv[ida].again;render();return;}
+  if(a.indexOf('rvNs:')===0){var idn=a.slice(5);S.rv[idn].ns=!S.rv[idn].ns;render();return;}
+  switch(a){
+    case 'nav':if(v==='create'){S.form=S.form||newForm();}S.screen=v;S.confirmDel=false;render();break;
+    case 'create':S.form=newForm();S.screen='create';render();break;
+    case 'quick':S.form=newForm({quick:true});S.screen='create';render();break;
+    case 'createFromFind':S.form=newForm(S.find);S.screen='create';render();break;
+    case 'open':S.sel=id;if(['detail','review'].indexOf(S.screen)<0)S.prev=S.screen;S.screen='detail';S.confirmDel=false;S.draft='';S.memMenu=null;S.notice=null;var tt=byId(id);if(tt&&isMember(tt))markRead(tt.id);render();break;
+    case 'back':if(S.screen==='review')S.screen='detail';else if(S.screen==='detail')S.screen=S.prev||'home';else if(S.screen==='adNew')S.screen='my';else S.screen='home';S.confirmDel=false;render();break;
+    case 'fmode':S.filter.mode=v;render();break;
+    case 'fmenu':S.filter.menu=v;render();break;
+    case 'fmood':S.find.mood=v;render();break;
+    case 'fslot':S.find.slot=v;render();break;
+    case 'fmenu2':S.find.menu=v;render();break;
+    case 'farea2':S.find.area=v;render();break;
+    case 'fnear':if(v==='near'&&!ageOf(uid)){toast('프로필에서 출생연도를 먼저 설정해 주세요');break;}S.find.near=v==='near';render();break;
+    case 'cquick':S.form.quick=v==='quick';render();break;
+    case 'carea':S.form.area=v;render();break;
+    case 'cmenu':S.form.menu=v;render();break;
+    case 'cmode':S.form.mode=v;render();break;
+    case 'cpur':toggleIn(S.form.purposes,v);render();break;
+    case 'conly':S.form.only=v==='same';render();break;
+    case 'crange':S.form.range=v==='range';render();break;
+    case 'cAminD':S.form.amin=Math.max(19,S.form.amin-1);render();break;
+    case 'cAminU':S.form.amin=Math.min(S.form.amax,S.form.amin+1);render();break;
+    case 'cAmaxD':S.form.amax=Math.max(S.form.amin,S.form.amax-1);render();break;
+    case 'cAmaxU':S.form.amax=Math.min(70,S.form.amax+1);render();break;
+    case 'cdec':S.form.capacity=Math.max(2,S.form.capacity-1);render();break;
+    case 'cinc':S.form.capacity=Math.min(6,S.form.capacity+1);render();break;
+    case 'submit':createTable();break;
+    case 'request':if(t)requestJoin(t);break;
+    case 'cancelReq':if(t)cancelReq(t);break;
+    case 'accept':case 'decline':if(t){var r=reqs.filter(function(x){return x._id===id;})[0];if(r)decide(t,r,a==='accept');}break;
+    case 'arrived':if(t)arrived(t);break;
+    case 'review':S.rv=null;S.screen='review';render();break;
+    case 'endMeal':if(t){S.busy=true;render();db.collection('tables').doc(t.id).update({endedAt:Date.now()}).then(function(){S.busy=false;S.rv=null;S.screen='review';toast('식사가 끝났어요. 수저로 평가해 주세요');}).catch(fail);}break;
+    case 'rvTag':toggleIn(S.rv[id].tags,v);render();break;
+    case 'rvScore':S.rv[id].score=+v;render();break;
+    case 'rvSubmit':if(t)submitReview(t);break;
+    case 'memMenu':S.memMenu=S.memMenu===id?null:id;render();break;
+    case 'block':toggleBlock(id);break;
+    case 'kick':if(t)kick(t,id);break;
+    case 'delAsk':S.confirmDel=true;render();var m=document.getElementById('main');if(m)m.scrollTop=m.scrollHeight;break;
+    case 'delNo':S.confirmDel=false;render();break;
+    case 'delYes':if(t)closeTable(t);break;
+    case 'obG':S.ob.gender=v;render();break;
+    case 'obA':S.ob.area=v;render();break;
+    case 'obD':toggleIn(S.ob.diets,v);render();break;
+    case 'obF':toggleIn(S.ob.foods,v);render();break;
+    case 'obPhotoRm':S.ob.photo=null;render();break;
+    case 'ePhotoRm':S.edit.photo=null;render();break;
+    case 'obP':toggleIn(S.ob.purposes,v);render();break;
+    case 'obAge':S.ob.age=!S.ob.age;render();break;
+    case 'obAgree':S.ob.agree=!S.ob.agree;render();break;
+    case 'obStart':var o=S.ob;if(o&&obOk(o)){S.busy=true;saveProfile({nick:o.nick.trim().slice(0,12),gender:o.gender,birthYear:validBy(o.by),age:bandOfAge(THIS_YEAR-validBy(o.by)),diets:o.diets.slice(),foods:o.foods.slice(),photo:o.photo||null,area:o.area,purposes:o.purposes.slice()}).then(function(){S.busy=false;priv.agreedAt=Date.now();savePriv();S.find.area=o.area;render();});}break;
+    case 'editProfile':var mm=me();S.edit=S.edit?null:{nick:mm.nick||'',gender:mm.gender||null,by:mm.birthYear?String(mm.birthYear):'',diets:(mm.diets||[]).slice(),foods:(mm.foods||[]).slice(),photo:mm.photo||null,area:mm.area||'상도동',purposes:(mm.purposes||[]).slice()};render();break;
+    case 'eG':S.edit.gender=v;render();break;
+    case 'eA':S.edit.area=v;render();break;
+    case 'eD':toggleIn(S.edit.diets,v);render();break;
+    case 'eF':toggleIn(S.edit.foods,v);render();break;
+    case 'eP':toggleIn(S.edit.purposes,v);render();break;
+    case 'saveProfile':var ed=S.edit;if(!ed.nick.trim()){toast('닉네임을 입력해 주세요');break;}if(!validBy(ed.by)){toast('출생연도를 정확히 입력해 주세요 (만 19세 이상)');break;}saveProfile({nick:ed.nick.trim().slice(0,12),gender:ed.gender,birthYear:validBy(ed.by),age:bandOfAge(THIS_YEAR-validBy(ed.by)),diets:ed.diets.slice(),foods:ed.foods.slice(),photo:ed.photo||null,area:ed.area,purposes:ed.purposes.slice()},'프로필을 저장했어요');S.edit=null;break;
+    case 'openAd':S.adSel=id;S.screen='ad';render();break;
+    case 'adTable':var ad=ads.filter(function(x){return x._id===S.adSel;})[0];if(ad){S.form=newForm({area:ad.area,menu:ad.menu,place:ad.name});S.screen='create';render();}break;
+    case 'adNew':S.adForm=null;S.screen='adNew';render();break;
+    case 'adSubmit':addAd();break;
+    case 'delAd':delAd(id);break;
+    case 'aarea':S.adForm.area=v;render();break;
+    case 'amenu':S.adForm.menu=v;render();break;
+  }
+});
+document.addEventListener('change',function(e){
+  var el=e.target;if(!el||el.type!=='file')return;var f=el.files&&el.files[0];
+  if(el.id==='ob-photo'&&S.ob)readPhoto(f,function(u){S.ob.photo=u;render();});
+  else if(el.id==='e-photo'&&S.edit)readPhoto(f,function(u){S.edit.photo=u;render();});
+});
+document.addEventListener('input',function(e){
+  var id=e.target.id,v=e.target.value;
+  if(id==='chat-in'){S.draft=v;return;}
+  if(id==='lg-email'){S.lg.email=v;return;}
+  if(id==='lg-pw'){S.lg.pw=v;return;}
+  if(S.aAd&&id.indexOf('ad-')===0){var ak={'ad-name':'name','ad-copy':'copy','ad-perk':'perk','ad-addr':'addr'}[id];if(ak)S.aAd[ak]=v;return;}
+  if(id==='req-msg'){S.reqMsg=v;return;}
+  if(id==='ob-by'&&S.ob){S.ob.by=v.replace(/[^0-9]/g,'').slice(0,4);var b2=document.querySelector('[data-act=obStart]');if(b2)b2.disabled=!obOk(S.ob);return;}
+  if(id==='ob-nick'&&S.ob){S.ob.nick=v;var btn=document.querySelector('[data-act=obStart]');var o=S.ob;if(btn)btn.disabled=!obOk(o);return;}
+  if(id==='e-nick'&&S.edit){S.edit.nick=v;return;}
+  if(id==='e-by'&&S.edit){S.edit.by=v.replace(/[^0-9]/g,'').slice(0,4);return;}
+  if(S.adForm&&id.indexOf('a-')===0){var k={'a-name':'name','a-copy':'copy','a-perk':'perk','a-addr':'addr'}[id];if(k)S.adForm[k]=v;return;}
+  if(!S.form)return;
+  var map={'f-title':'title','f-place':'place','f-date':'date','f-time':'time','f-note':'note'};if(map[id])S.form[map[id]]=v;
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();
+  if(e.target.id==='lgform'){adminClick('a_login');return;}
+  if(e.target.id==='chatform'){var t=byId(S.sel);if(t)sendMsg(t,S.draft,false);}
+  else if(e.target.id==='cform')createTable();
+  else if(e.target.id==='adform')addAd();
+  else if(e.target.id==='aadform')aAdAdd();
+});
+
+// ---------- data ----------
+function onReqs(arr){
+  if(reqSeen===null){reqSeen={};arr.forEach(function(r){reqSeen[r._id]=r.status;});return;}
+  arr.forEach(function(r){
+    var prev=reqSeen[r._id];reqSeen[r._id]=r.status;if(prev===r.status)return;
+    var t=byId(r.tableId);if(!t)return;
+    if(r.userId===uid&&r.status==='accepted'&&prev)notify(t.id,'매칭됐어요 · '+t.title,'채팅방이 열렸어요. 만날 식당을 정해 보세요');
+    else if(r.userId===uid&&r.status==='declined'&&prev)toast('이번 밥약은 매칭되지 않았어요');
+    else if(t.hostId===uid&&r.status==='pending'&&!prev&&r.userId!==uid&&!isBlockedUser(r.userId))notify(t.id,'새 신청 · '+t.title,nick(r.userId)+'님이 같이 먹고 싶어 해요');
+  });
+}
+function onMsgs(arr){
+  if(!msgInit){msgInit=true;arr.forEach(function(m){seenMsg[m._id]=1;});return;}
+  arr.forEach(function(m){
+    if(seenMsg[m._id])return;seenMsg[m._id]=1;
+    if(m.userId===uid||isBlockedUser(m.userId)||m.at<bootAt-5000)return;
+    var t=byId(m.tableId);if(!t||!isMember(t))return;
+    if(S.screen==='detail'&&S.sel===t.id){markRead(t.id);return;}
+    notify(t.id,(m.sys?'도착 알림':'새 메시지')+' · '+t.title,m.sys?m.text:nick(m.userId)+': '+m.text);
+  });
+}
+function sub(q,key){
+  q.onSnapshot(function(snap){
+    var arr=snap.docs.filter(function(d){return d.exists;}).map(function(d){var o=Object.assign({},d.data());o._id=d.id;if(key==='t')o.id=d.id;return o;});
+    if(key==='t')tables=arr.filter(function(t){return t.hostId&&t.title;});
+    else if(key==='r'){reqs=arr;onReqs(arr);}
+    else if(key==='p'){var mp={};arr.forEach(function(o){mp[o._id]=o;});profiles=mp;}
+    else if(key==='n'){var nm={};arr.forEach(function(o){nm[o._id]=o;});noshows=nm;}
+    else if(key==='v'){var vm={};arr.forEach(function(o){vm[o._id]=o;});reviews=vm;}
+    else if(key==='a')ads=arr.filter(function(a){return a.name;});
+    else if(key==='b'){var bm={};arr.forEach(function(o){if(o.userId)bm[o.userId]=o;});bans=bm;}
+    else if(key==='d'){var md=arr.filter(function(o){return o._id==='noshow';})[0];moder={dismissed:(md&&md.dismissed)||{}};}
+    else{messages=arr;onMsgs(arr);}
+    if(!snap.metadata.fromCache||arr.length)loaded[key]=true;
+    render();
+  },function(){loaded[key]=true;if(key==='t')loadErr='잠시 후 다시 열어 주세요';render();});
+}
+var FB=null,authUser=null,started=false;
+try{firebase.initializeApp(FIREBASE_CONFIG);FB={db:firebase.firestore(),auth:firebase.auth()};}catch(e){dbChecked=true;loadErr='Firebase 설정값을 확인해 주세요';}
+function start(id){
+  if(started)return;started=true;
+  uid=id;db=FB.db;canWrite=true;dbChecked=true;
+  var timer=setTimeout(function(){slow=true;render();},10000);
+  sub(db.collection('tables').orderBy('createdAt','desc').limit(300),'t');
+  sub(db.collection('joins').limit(1000),'r');
+  sub(db.collection('profiles').limit(1000),'p');
+  sub(db.collection('noshows').limit(1000),'n');
+  sub(db.collection('reviews').limit(1000),'v');
+  sub(db.collection('ads').orderBy('createdAt','desc').limit(30),'a');
+  sub(db.collection('bans').limit(1000),'b');
+  sub(db.collection('moderation').limit(10),'d');
+  sub(db.collection('messages').orderBy('at','desc').limit(500),'m');
+  db.doc('data/users/'+uid+'/state').onSnapshot(function(d){
+    if(d.exists&&!d.metadata.hasPendingWrites&&!privBusy&&!markT){var x=d.data()||{};priv.blocks=(x.blocks||[]).slice();priv.agreedAt=Math.max(priv.agreedAt||0,x.agreedAt||0);var lr=x.lastRead||{};Object.keys(lr).forEach(function(k){priv.lastRead[k]=Math.max(priv.lastRead[k]||0,lr[k]||0);});}
+    privLoaded=true;render();
+  },function(){privLoaded=true;render();});
+  var iv=setInterval(function(){if(loaded.t){clearTimeout(timer);slow=false;clearInterval(iv);}},500);
+  setInterval(function(){if(S.screen==='detail'||S.screen==='my'||S.screen==='home')render();},60000);
+  render();
+}
+if(FB){FB.auth.onAuthStateChanged(function(u){
+  if(APP_MODE==='admin'){
+    authUser=u&&!u.isAnonymous?u:null;dbChecked=true;
+    if(!authUser){render();return;}
+    FB.db.doc('admins/'+u.uid).get().then(function(d){amAdmin=d.exists;adminChecked=true;if(amAdmin)start(u.uid);else render();}).catch(function(){amAdmin=false;adminChecked=true;render();});
+    return;
+  }
+  if(!u){FB.auth.signInAnonymously().catch(function(){dbChecked=true;loadErr='Firebase 콘솔에서 익명 로그인을 켜 주세요';render();});return;}
+  start(u.uid);
+});}
+render();
+})();
+</script>
+</body>
+</html>
