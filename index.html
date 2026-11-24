@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코밀 Co-Meal — 동작구 밥친구 매칭</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#C4401F;--accent-d:#A23517;--tint:#FBE9E1;--tint-t:#A23517;--cream:#F6EDE3;--ink:#3A2621;--txt:#2A1D19;--sub:#6E625D;--line:#EEE6DE;--gray:#F4EFEA;--blue:#2F5D8A;--blue-bg:#E8F0F8;--green:#2F6B45;--green-bg:#E5F2E9}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E9E1D8}
+body{font-family:'Noto Sans KR',system-ui,sans-serif;color:var(--txt);letter-spacing:-0.2px;-webkit-font-smoothing:antialiased}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:480px;margin:0 auto;height:100%;background:#fff;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.app.wide{max-width:1180px}
+.adm{padding:24px 32px 48px}
+.ahdr{display:flex;align-items:center;justify-content:space-between;padding:18px 32px 10px;gap:12px;flex-wrap:wrap}
+.atabs{display:flex;flex-wrap:wrap;padding:0 32px;border-bottom:1px solid var(--line)}
+.atab{border:0;background:none;padding:12px 4px;margin-right:22px;font-size:15px;font-weight:700;color:var(--sub);border-bottom:3px solid transparent;min-height:48px}
+.atab.on{color:var(--ink);border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:28px}
+.stat{background:var(--cream);border-radius:14px;padding:16px 18px;font-size:13px;color:var(--sub);font-weight:700}
+.stat b{display:block;font-size:30px;font-weight:900;color:var(--ink);margin-top:4px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+.tbl th{text-align:left;font-size:12px;color:var(--sub);font-weight:700;padding:12px 12px;border-bottom:1px solid var(--line);background:#FBF7F3}
+.tbl td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.aform{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:28px;padding:22px;border:1px solid var(--line);border-radius:14px;background:#FFFCF9}
+.ah2{font-size:18px;font-weight:800;margin:0 0 14px}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.main::-webkit-scrollbar{display:none}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand b{font-size:21px;font-weight:900;color:var(--accent);letter-spacing:-0.4px}
+.iconbtn{width:44px;height:44px;border:0;background:none;display:flex;align-items:center;justify-content:center;border-radius:22px;color:var(--ink)}
+.iconbtn:hover{background:var(--gray)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.hero{margin:4px 20px 16px;padding:20px;background:var(--ink);border-radius:18px;color:#fff}
+.hero .k{font-size:13px;color:#F2C9B8;font-weight:700}
+.hero .t{font-size:20px;font-weight:800;line-height:1.4;margin-top:4px}
+.hero .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pill{height:44px;padding:0 18px;border:0;border-radius:22px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;flex-shrink:0}
+.pill:hover{background:var(--accent-d)}
+.pill.light{background:#fff;color:var(--ink)}
+.pill.light:hover{background:var(--cream)}
+.sep{height:8px;background:var(--gray)}
+.sec{padding:20px 20px 6px}
+.sec h2{margin:0;font-size:18px;font-weight:800}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.muted{font-size:13px;color:var(--sub)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{min-height:38px;padding:0 14px;border-radius:19px;border:1px solid #DCD2C8;background:#fff;color:#4A3F3A;font-size:14px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.chip.on{border-color:var(--ink);background:var(--ink);color:#fff;font-weight:700}
+.list{padding:2px 20px 24px}
+.card{width:100%;border:0;background:none;padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;text-align:left}
+.thumb{width:84px;height:84px;flex-shrink:0;border-radius:14px;display:flex;align-items:flex-end;padding:10px;font-size:13px;font-weight:800;color:#3A2A20;word-break:keep-all}
+.cbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ctitle{font-size:16px;font-weight:700;line-height:1.35;word-break:keep-all}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.tag{font-size:12px;font-weight:500;color:#4A3F3A;background:var(--gray);padding:3px 8px;border-radius:6px}
+.tag.quiet{color:var(--blue);background:var(--blue-bg);font-weight:700}
+.tag.talk{color:var(--tint-t);background:var(--tint);font-weight:700}
+.tag.g{color:#5B3FA0;background:#EFE9FA;font-weight:700}
+.tag.full{color:#fff;background:#6E625D;font-weight:700}
+.tag.new{color:#fff;background:var(--accent);font-weight:700}
+.tag.warn{color:#B3261E;background:#FDECEA;font-weight:700}
+.tag.ok{color:var(--green);background:var(--green-bg);font-weight:700}
+.tag.bolt{color:#7A4A00;background:#FFF0C9;font-weight:700}
+.reason{font-size:12px;font-weight:700;color:var(--green)}
+.hostline{font-size:12px;color:var(--sub)}
+.cnt{font-size:13px;font-weight:700;color:var(--accent)}
+.empty{padding:40px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty b{font-size:16px}
+.nav{flex-shrink:0;height:68px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff}
+.nav button{position:relative;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#9A8F89;font-size:11px;font-weight:700}
+.nav button.on{color:var(--ink)}
+.badge{position:absolute;top:6px;left:calc(50% + 4px);min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;line-height:18px;padding:0 5px;text-align:center}
+.top{display:flex;align-items:center;gap:4px;padding:8px 8px 8px 4px;position:sticky;top:0;background:#fff;z-index:2}
+.top h1{margin:0;font-size:17px;font-weight:800}
+.dhero{height:180px;display:flex;align-items:flex-end;padding:20px;font-size:28px;font-weight:800;color:#3A2A20;word-break:keep-all}
+.pad{padding:20px}
+.dl{margin:0;padding:8px 20px}
+.dl div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.dl div:last-child{border-bottom:0}
+.dl dt{font-size:14px;color:var(--sub);flex-shrink:0}
+.dl dd{margin:0;font-size:14px;font-weight:700;text-align:right;word-break:keep-all}
+.note{margin:4px 20px 16px;padding:16px;border-radius:12px;background:var(--cream);font-size:14px;line-height:1.6;color:var(--txt);white-space:pre-wrap;word-break:break-word}
+.subh{font-size:15px;font-weight:800;margin:0;padding:18px 20px 0}
+.members{display:flex;flex-direction:column;gap:14px;padding:12px 20px 20px}
+.mem{display:flex;align-items:center;gap:12px}
+.av{width:42px;height:42px;border-radius:21px;background:var(--tint);color:var(--tint-t);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
+.mrow{display:flex;flex-direction:column;gap:8px}
+.memact{display:flex;gap:6px;flex-wrap:wrap;padding-left:54px}
+.mbtn{min-height:36px;padding:0 12px;border-radius:9px;border:1px solid #DCD2C8;background:#fff;font-size:13px;font-weight:700}
+.mbtn:disabled{color:#A49A94;cursor:default}
+.mbtn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.mbtn.warn{color:#B3261E;border-color:#F0C4C0}
+.more{margin-left:auto;width:44px;height:44px;border:0;background:none;border-radius:22px;font-size:20px;font-weight:800;color:var(--sub)}
+.more:hover{background:var(--gray)}
+.bar{flex-shrink:0;padding:12px 20px 16px;border-top:1px solid var(--line);display:flex;gap:10px;background:#fff}
+.btn{flex:1;height:52px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:700}
+.btn:hover{background:var(--accent-d)}
+.btn:disabled{background:#CFC6BF;cursor:default}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid #DCD2C8}
+.btn.ghost:hover{background:var(--gray)}
+.btn.sm{height:44px;font-size:14px;flex:0 0 auto;padding:0 16px}
+.form{padding:8px 20px 24px;display:flex;flex-direction:column;gap:22px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field>label,.field>.lbl{font-size:15px;font-weight:700}
+.inp{height:48px;border:1px solid #DCD2C8;border-radius:12px;padding:0 14px;font-size:15px;background:#fff;outline:none;width:100%}
+textarea.inp{height:88px;padding:12px 14px;resize:none;line-height:1.5}
+.inp:focus{border-color:var(--ink)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mood{display:flex;flex-direction:column;gap:10px}
+.moodbtn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:15px;border-radius:14px;background:#fff;border:1px solid #DCD2C8}
+.moodbtn.on{background:var(--tint);border:2px solid var(--accent);padding:14px}
+.moodbtn b{font-size:15px}
+.moodbtn span{font-size:13px;color:var(--sub);line-height:1.5}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:44px;height:44px;border-radius:22px;border:1px solid #DCD2C8;background:#fff;font-size:20px;font-weight:700}
+.stepper output{font-size:17px;font-weight:800;min-width:40px;text-align:center}
+.chat{padding:4px 20px 12px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;flex-direction:column;gap:3px;max-width:80%}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg .who{font-size:11px;color:var(--sub)}
+.msg .txt{padding:9px 13px;border-radius:14px;background:var(--gray);font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.me .txt{background:var(--accent);color:#fff}
+.sysmsg{align-self:center;font-size:12px;font-weight:700;color:var(--green);background:var(--green-bg);padding:5px 12px;border-radius:12px}
+.chatin{display:flex;gap:8px;padding:0 20px 16px}
+.banner2{margin:12px 20px 0;padding:12px 14px;border-radius:12px;background:var(--blue-bg);color:var(--blue);font-size:13px;line-height:1.5}
+.banner2.red{background:#FDECEA;color:#B3261E}
+.banner2.green{background:var(--green-bg);color:var(--green)}
+.toast{position:absolute;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:24px;font-size:14px;font-weight:500;white-space:nowrap;z-index:10;pointer-events:none}
+.notice{position:absolute;left:12px;right:12px;top:12px;z-index:11;border:0;background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.notice span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.confirm{margin:0 20px 16px;padding:16px;border:1px solid #F3C6B5;background:#FFF8F5;border-radius:12px;display:flex;flex-direction:column;gap:12px}
+.confirm .acts{display:flex;gap:8px}
+.pcard{margin:12px 20px 0;padding:18px;border-radius:16px;background:var(--cream);display:flex;flex-direction:column;gap:10px}
+.pcard .av{width:52px;height:52px;border-radius:26px;font-size:19px;background:#fff}
+.mtags{display:flex;gap:6px;flex-wrap:wrap}
+.mtag{font-size:12px;font-weight:700;color:var(--ink);background:#fff;border:1px solid #E5D9CD;padding:4px 9px;border-radius:14px}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;font-size:14px;padding:8px 0;min-height:44px}
+.ckrow{display:flex;align-items:flex-start;gap:12px;border:0;background:none;text-align:left;padding:10px 0;font-size:14px;line-height:1.5;min-height:44px}
+.ck{width:24px;height:24px;flex-shrink:0;border-radius:7px;border:2px solid #C9BFB7;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
+.ck.on{background:var(--accent);border-color:var(--accent)}
+.adrow{display:flex;gap:12px;overflow-x:auto;padding:12px 20px 4px}
+.adrow::-webkit-scrollbar{display:none}
+.adc{flex:0 0 200px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column}
+.adth{height:84px;display:flex;align-items:flex-end;padding:10px;font-weight:800;font-size:13px;color:#3A2A20}
+.adb{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}
+.adb b{font-size:15px}
+.adl{font-size:11px;font-weight:700;color:var(--sub);border:1px solid #CFC5BC;border-radius:4px;padding:0 5px;align-self:flex-start}
+.adp{font-size:12px;font-weight:700;color:var(--accent)}
+.perk{margin:4px 20px 16px;padding:14px 16px;border-radius:12px;background:var(--tint);display:flex;flex-direction:column;gap:4px;color:var(--tint-t);font-size:14px;line-height:1.5}
+.rv{margin:12px 20px;padding:16px;border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;gap:12px}
+.steps{display:flex;gap:6px;padding:4px 20px 0;flex-wrap:wrap}
+.step{font-size:12px;font-weight:700;color:#A49A94;background:var(--gray);padding:5px 10px;border-radius:12px}
+.step.on{color:#fff;background:var(--ink)}
+.step.done{color:var(--green);background:var(--green-bg)}
+</style>
+</head>
+<body>
+<div class="app" id="app"><main class="main" id="main"><div class="empty"><span class="muted">불러오는 중…</span></div></main></div>
+<script>
+/* Co-Meal 데모 모드: 서버 없이 이 브라우저(localStorage)에만 저장돼요. */
+(function(){
+var KEY='comeal-demo-v1',ME='me';
+var H=3600e3,D=864e5;
+function pad(n){return (n<10?'0':'')+n;}
+function ymd(ms){var d=new Date(ms);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function slot(hoursAhead){var d=new Date(Date.now()+hoursAhead*H);d.setMinutes(d.getMinutes()<30?30:0);if(d.getMinutes()===0)d.setHours(d.getHours()+1);return {date:ymd(d.getTime()),time:pad(d.getHours())+':'+pad(d.getMinutes())};}
+function todayOr(hm){var t=new Date(ymd(Date.now())+'T'+hm).getTime();return {date:ymd(t>Date.now()+90*60e3?Date.now():Date.now()+D),time:hm};}
+function fixed(dayOff,hm){return {date:ymd(Date.now()+dayOff*D),time:hm};}
+
+var BOTS={
+ b1:{nick:'로컬',gender:'female',birthYear:2004,area:'흑석동',purposes:['맛집 탐방','동네 친구'],diets:['매운 거 좋아해요']},
+ b2:{nick:'노량진러',gender:'male',birthYear:2000,area:'노량진',purposes:['공부·취준 메이트'],diets:['양 많이 먹어요']},
+ b3:{nick:'상도주민',gender:'female',birthYear:1998,area:'상도동',purposes:['퇴근 후 한 끼'],diets:['가리는 것 없어요']},
+ b4:{nick:'단거러버',gender:'female',birthYear:2003,area:'사당',purposes:['동네 친구'],diets:['소식해요']},
+ b5:{nick:'고기진심',gender:'male',birthYear:2001,area:'흑석동',purposes:['맛집 탐방'],diets:['양 많이 먹어요','술 없이 먹어요']},
+ b6:{nick:'대방토박이',gender:'male',birthYear:1995,area:'대방',purposes:['혼밥 탈출'],diets:['가리는 것 없어요']}
+};
+function seedTables(){
+ var a=todayOr('19:30'),b=todayOr('20:30');
+ return [
+  Object.assign({id:'s1',hostId:'b1',title:'마라샹궈 2인분 같이 시켜요',area:'흑석동',place:'중앙대 정문 앞',menu:'중식·마라',mode:'talk',purposes:['맛집 탐방'],capacity:2,note:'맵기는 중간 정도로 시키려고 해요. 각자 결제!',createdAt:Date.now()-1*H,status:'open'},a),
+  Object.assign({id:'s2',hostId:'b2',title:'감자탕 중자 나눠 드실 분',area:'노량진',place:'노량진역 1번 출구',menu:'국밥·찌개',mode:'quiet',purposes:['공부·취준 메이트'],capacity:3,note:'공부하다 나와서 조용히 먹고 들어가요.',createdAt:Date.now()-2*H,status:'open'},b),
+  Object.assign({id:'s3',hostId:'b5',title:'삼겹살 3인분 같이 구워요',area:'흑석동',place:'흑석시장 근처',menu:'고기',mode:'talk',purposes:['맛집 탐방'],capacity:3,note:'술 없이 고기만 먹어요.',createdAt:Date.now()-3*H,status:'open'},fixed(1,'19:00')),
+  Object.assign({id:'s4',hostId:'b4',title:'홀케이크 한 판 나눠 먹어요',area:'사당',place:'사당역 카페거리',menu:'디저트·카페',mode:'talk',purposes:['동네 친구'],capacity:4,note:'',createdAt:Date.now()-4*H,status:'open',genderOnly:'female'},fixed(1,'15:00')),
+  Object.assign({id:'s5',hostId:'b3',title:'닭볶음탕 같이 먹어요',area:'상도동',place:'상도역',menu:'한식',mode:'quiet',purposes:['퇴근 후 한 끼'],capacity:2,note:'퇴근 후 7시 반쯤 가능해요.',createdAt:Date.now()-5*H,status:'open',ageMin:24,ageMax:35},fixed(2,'19:30')),
+  Object.assign({id:'s6',hostId:'b6',title:'떡볶이+튀김 세트 반반',area:'대방',place:'대방역 근처',menu:'분식',mode:'talk',purposes:['혼밥 탈출'],capacity:2,note:'',createdAt:Date.now()-6*H,status:'open'},fixed(2,'12:30'))
+ ];
+}
+function seedReviews(){
+ function it(t,tags,again){return {tableId:'old',target:t,tags:tags,again:again,at:Date.now()-5*D};}
+ return {
+  b2:{items:{a:it('b1',['시간 약속을 잘 지켜요','대화가 편했어요'],true),b:it('b5',['맛집을 잘 알아요'],true)}},
+  b3:{items:{a:it('b1',['매너가 좋아요','맛집을 잘 알아요'],true),b:it('b2',['조용히 편하게 먹었어요'],false)}},
+  b4:{items:{a:it('b3',['시간 약속을 잘 지켜요','매너가 좋아요'],true),b:it('b6',['대화가 편했어요'],false)}},
+  b6:{items:{a:it('b4',['대화가 편했어요','매너가 좋아요'],true),b:it('b5',['시간 약속을 잘 지켜요'],true)}}
+ };
+}
+var store;
+try{store=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){store=null;}
+if(!store||!store.c)store={c:{},docs:{}};
+var C=store.c;['tables','joins','profiles','noshows','reviews','ads','bans','moderation','messages'].forEach(function(n){C[n]=C[n]||{};});
+// 샘플은 열 때마다 날짜를 새로 맞춰요 (직접 만든 데이터는 그대로)
+seedTables().forEach(function(t){var id=t.id;delete t.id;C.tables[id]=t;});
+Object.keys(BOTS).forEach(function(k){C.profiles[k]=BOTS[k];});
+var sr=seedReviews();Object.keys(sr).forEach(function(k){if(!C.reviews[k])C.reviews[k]=sr[k];});
+if(!C.ads.ad1)C.ads.ad1={name:'흑석 마라당',area:'흑석동',menu:'중식·마라',copy:'코밀로 만난 손님께 음료 서비스',perk:'음료 1잔 무료',createdAt:Date.now()-D};
+if(!C.ads.ad2)C.ads.ad2={name:'노량진 원조감자탕',area:'노량진',menu:'국밥·찌개',copy:'2인 이상 방문 시 볶음밥 1인분 서비스',perk:'볶음밥 서비스',createdAt:Date.now()-2*D};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+save();
+
+var subs=[],docSubs=[];
+function snapOf(name,opt){
+ var o=C[name],arr=Object.keys(o).map(function(id){return {id:id,v:o[id]};});
+ if(opt.order){var f=opt.order[0],dsc=opt.order[1]==='desc';arr.sort(function(a,b){var x=a.v[f]||0,y=b.v[f]||0;return dsc?y-x:x-y;});}
+ if(opt.limit)arr=arr.slice(0,opt.limit);
+ return {docs:arr.map(function(e){return {id:e.id,exists:true,data:function(){return JSON.parse(JSON.stringify(e.v));}};}),metadata:{fromCache:false,hasPendingWrites:false}};
+}
+function fire(name){subs.forEach(function(s){if(s.name===name)setTimeout(function(){s.cb(snapOf(name,s.opt));},0);});}
+function fireDoc(path){docSubs.forEach(function(s){if(s.path===path)setTimeout(function(){s.cb(dsnap(path));},0);});}
+function dsnap(path){var v=store.docs[path];return {exists:!!v,id:path.split('/').pop(),data:function(){return v?JSON.parse(JSON.stringify(v)):undefined;},metadata:{hasPendingWrites:false}};}
+var seq=0;function newId(){return 'd'+Date.now().toString(36)+(seq++);}
+
+function setDoc(name,id,val,merge){C[name][id]=merge?Object.assign({},C[name][id]||{},val):val;save();fire(name);afterWrite(name,id);}
+function docRef(name,id){
+ return {id:id,
+  set:function(v,o){setDoc(name,id,JSON.parse(JSON.stringify(v)),o&&o.merge);return Promise.resolve();},
+  update:function(v){if(!C[name][id])return Promise.reject(new Error('없는 문서'));setDoc(name,id,JSON.parse(JSON.stringify(v)),true);return Promise.resolve();},
+  delete:function(){delete C[name][id];save();fire(name);return Promise.resolve();},
+  get:function(){var v=C[name][id];return Promise.resolve({exists:!!v,id:id,data:function(){return v;}});},
+  onSnapshot:function(cb){var p=name+'/'+id;var s={path:p,cb:function(){cb({exists:!!C[name][id],id:id,data:function(){return C[name][id];},metadata:{hasPendingWrites:false}});}};docSubs.push(s);setTimeout(s.cb,0);return function(){};}
+ };
+}
+function coll(name,opt){
+ opt=opt||{};
+ return {
+  orderBy:function(f,d){return coll(name,Object.assign({},opt,{order:[f,d||'asc']}));},
+  limit:function(n){return coll(name,Object.assign({},opt,{limit:n}));},
+  where:function(){return coll(name,opt);},
+  doc:function(id){return docRef(name,id||newId());},
+  add:function(v){var id=newId();setDoc(name,id,JSON.parse(JSON.stringify(v)));return Promise.resolve({id:id});},
+  onSnapshot:function(cb,err){var s={name:name,opt:opt,cb:cb};subs.push(s);setTimeout(function(){cb(snapOf(name,opt));},30);return function(){};}
+ };
+}
+var db={
+ collection:function(n){if(!C[n])C[n]={};return coll(n);},
+ doc:function(path){
+  var p=path.split('/');
+  if(p.length===2)return docRef(p[0],p[1]);
+  return {
+   set:function(v){store.docs[path]=JSON.parse(JSON.stringify(v));save();fireDoc(path);return Promise.resolve();},
+   update:function(v){store.docs[path]=Object.assign({},store.docs[path]||{},v);save();fireDoc(path);return Promise.resolve();},
+   delete:function(){delete store.docs[path];save();fireDoc(path);return Promise.resolve();},
+   get:function(){return Promise.resolve(dsnap(path));},
+   onSnapshot:function(cb){docSubs.push({path:path,cb:cb});setTimeout(function(){cb(dsnap(path));},30);return function(){};}
+  };
+ }
+};
+
+/* 데모용 이웃 반응: 신청하면 모집자가 수락하고, 채팅에 답해요. 내가 밥약을 열면 이웃이 신청해요. */
+var REPLIES=['좋아요! 그럼 그때 봬요 🙂','저도 딱 그 생각이었어요','혹시 늦으면 채팅 남겨 주세요!','메뉴는 가서 같이 골라요','저는 조금 일찍 도착할 것 같아요','네 좋습니다!'];
+var handled={};
+function later(ms,fn){setTimeout(fn,ms);}
+function botSay(tableId,botId,text){later(0,function(){db.collection('messages').add({tableId:tableId,userId:botId,text:text,sys:false,at:Date.now()});});}
+function afterWrite(name,id){
+ var v=C[name][id];if(!v||handled[name+id+(v.status||'')])return;
+ if(name==='joins'&&v.userId===ME&&v.status==='pending'){
+  handled[name+id+'pending']=1;var t=C.tables[v.tableId];if(!t||!BOTS[t.hostId])return;
+  later(2500,function(){if(!C.joins[id]||C.joins[id].status!=='pending')return;
+   setDoc('joins',id,{status:'accepted',decidedAt:Date.now()},true);
+   later(1500,function(){botSay(v.tableId,t.hostId,BOTS[t.hostId].nick+'예요! 신청 고마워요 😊 '+(t.place?t.place+'에서 ':'')+'만나요');});});
+ }
+ if(name==='messages'&&v.userId===ME&&!v.sys){
+  handled[name+id]=1;var t2=C.tables[v.tableId];if(!t2)return;
+  var others=[t2.hostId].concat(Object.keys(C.joins).map(function(k){return C.joins[k];}).filter(function(j){return j.tableId===v.tableId&&j.status==='accepted';}).map(function(j){return j.userId;})).filter(function(x){return x!==ME&&BOTS[x];});
+  if(!others.length)return;
+  later(1800,function(){botSay(v.tableId,others[0],REPLIES[Math.floor(Math.random()*REPLIES.length)]);});
+ }
+ if(name==='tables'&&v.hostId===ME&&!handled['host'+id]){
+  handled['host'+id]=1;
+  var cand=['b1','b3','b4','b5'].filter(function(b){var g=BOTS[b].gender;return !v.genderOnly||v.genderOnly===g;});
+  var who=cand[Math.floor(Math.random()*cand.length)]||'b1';
+  later(5000,function(){if(!C.tables[id])return;
+   docRef('joins',id+'__'+who).set({tableId:id,userId:who,at:Date.now(),status:'pending',msg:'저도 이 메뉴 먹고 싶었어요! 같이 먹어요'});});
+ }
+}
+
+var user={id:function(){return Promise.resolve(ME);},can:function(){return Promise.resolve(true);},canEdit:function(){return Promise.resolve(true);}};
+window.claude={use:function(k){return Promise.resolve(k==='db'?db:k==='user'?user:null);}};
+window.comealDemoReset=function(){localStorage.removeItem(KEY);location.reload();};
+})();
+
+</script>
+<script>
+(function(){
+'use strict';
+var AREAS=['상도동','노량진','흑석동','사당','대방','신대방'];
+var MENUS=['한식','국밥·찌개','고기','중식·마라','분식','일식','양식','디저트·카페','아무거나'];
+var PURPOSES=['혼밥 탈출','맛집 탐방','동네 친구','공부·취준 메이트','퇴근 후 한 끼'];
+var AGES=['20대 초반','20대 중반','20대 후반','30대','40대 이상'];
+var DIETS=['가리는 것 없어요','채식해요','매운 거 좋아해요','매운 건 못 먹어요','양 많이 먹어요','소식해요','술 없이 먹어요'];
+var MANNER=['시간 약속을 잘 지켜요','대화가 편했어요','매너가 좋아요','조용히 편하게 먹었어요','맛집을 잘 알아요'];
+var MODE={quiet:'조용히 먹기',talk:'대화하며 먹기'};
+var GL={female:'여성',male:'남성'};
+var TINTS={'한식':'#E3EEDC','국밥·찌개':'#FCE3D3','고기':'#F8DCDC','중식·마라':'#FBE7CF','분식':'#FDE8EC','일식':'#E4ECF6','양식':'#EFE7F7','디저트·카페':'#F1E2D3','아무거나':'#F1E6D2'};
+var NS_LIMIT=3,NS_DAYS=14,REVIEW_WINDOW=48*3600e3;
+var LOGO='<svg width="34" height="17" viewBox="0 0 260 130" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="24"><path d="M88 26 A46 46 0 1 0 88 104"/><path d="M172 26 A46 46 0 1 1 172 104"/></g><rect x="78" y="54" width="104" height="20" fill="currentColor"/><rect x="120" y="54" width="20" height="58" fill="currentColor"/></svg>';
+var ICON={
+ back:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
+ plus:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+ home:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3z"/></svg>',
+ find:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15.5 14.2c3 .2 5.5 2.6 5.5 5.8"/></svg>',
+ add:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 8v8M8 12h8"/></svg>',
+ my:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+ send:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg>'
+};
+
+var db=null,user=null,uid=null,canWrite=null,readOnly=false,amAdmin=false,dbChecked=false,slow=false,loadErr='';
+var tables=[],reqs=[],messages=[],profiles={},noshows={},reviews={},ads=[],bans={},moder={dismissed:{}},adminChecked=false;
+var loaded={t:false,r:false,m:false,p:false,n:false,v:false,a:false,b:false,d:false};
+var priv={blocks:[],lastRead:{},agreedAt:0},privLoaded=false,privQ=false,privBusy=false,markT=null;
+var bootAt=Date.now(),seenMsg={},msgInit=false,reqSeen=null;
+var S={screen:'home',sel:null,prev:'home',filter:{mode:'all',menu:'전체'},
+  find:{mood:'quiet',slot:'저녁',area:null,menu:'아무거나',near:false},
+  form:null,draft:'',reqMsg:'',confirmDel:false,busy:false,toast:'',notice:null,memMenu:null,ob:null,edit:null,rv:null,adForm:null,adSel:null};
+
+// ---------- utils ----------
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pad(n){return (n<10?'0':'')+n;}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function safeId(s){return String(s).replace(/[^A-Za-z0-9_\-.~:@+]/g,'_');}
+function when(t){var d=new Date(t.date+'T'+(t.time||'12:00'));return isNaN(d)?0:d.getTime();}
+function slotOf(time){var h=parseInt((time||'12').slice(0,2),10);return h<15?'점심':(h<21?'저녁':'야식');}
+function dayLabel(date){var today=ymd(new Date()),tm=new Date();tm.setDate(tm.getDate()+1);if(date===today)return '오늘';if(date===ymd(tm))return '내일';var d=new Date(date+'T00:00');if(isNaN(d))return date;return (d.getMonth()+1)+'월 '+d.getDate()+'일 ('+'일월화수목금토'[d.getDay()]+')';}
+function timeLabel(t){var p=(t.time||'').split(':');var h=+p[0],m=p[1]||'00';if(isNaN(h))return '';return (h<12?'오전 ':'오후 ')+((h%12)||12)+':'+m;}
+function fmtDate(ms){var d=new Date(ms);return (d.getMonth()+1)+'월 '+d.getDate()+'일';}
+function byId(id){return tables.filter(function(x){return x.id===id;})[0];}
+function toast(msg){S.toast=msg;render();clearTimeout(toast._t);toast._t=setTimeout(function(){S.toast='';render();},2400);}
+function fail(e){S.busy=false;if(e&&e.code==='invalid_argument'&&canWrite!==true){readOnly=true;toast('이 링크에서는 둘러보기만 할 수 있어요');return;}if(e&&e.code==='quota_exceeded'){toast('저장 공간이 가득 찼어요');return;}toast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');render();}
+
+// ---------- people ----------
+function prof(id){return profiles[id]||{};}
+function me(){return prof(uid);}
+function nick(id){var n=prof(id).nick;if(id===uid)return n||'나';return n||'이웃';}
+function initial(id){return esc(nick(id).charAt(0));}
+function genderOf(id){var g=prof(id).gender;return GL[g]?g:null;}
+function gTxt(id){var g=genderOf(id);return g?GL[g]:'성별 미설정';}
+function myGender(){return genderOf(uid);}
+var THIS_YEAR=new Date().getFullYear();
+var BAND_MID={'20대 초반':21,'20대 중반':25,'20대 후반':28,'30대':34,'40대 이상':45};
+function bandOfAge(n){if(!n)return null;if(n<24)return '20대 초반';if(n<27)return '20대 중반';if(n<30)return '20대 후반';if(n<40)return '30대';return '40대 이상';}
+function ageNum(id){var p=prof(id);if(p.birthYear)return THIS_YEAR-p.birthYear;return BAND_MID[p.age]||0;}
+function ageOf(id){return bandOfAge(ageNum(id));}
+function ageIdx(id){return AGES.indexOf(ageOf(id));}
+function validBy(v){var n=parseInt(v,10);return n>=1950&&n<=THIS_YEAR-19?n:0;}
+function ageRangeTxt(t){if(t.ageMin||t.ageMax)return (t.ageMin||19)+'~'+(t.ageMax||70)+'세';return t.ageNear?t.ageNear+' 또래':'';}
+function dietsOf(id){return (prof(id).diets||[]).filter(function(d){return DIETS.indexOf(d)>=0;});}
+function ageNearOk(t){if(t.ageMin||t.ageMax){var n=ageNum(uid);return !!n&&n>=(t.ageMin||19)&&n<=(t.ageMax||70);}if(!t.ageNear)return true;var a=ageIdx(uid),h=AGES.indexOf(t.ageNear);return a>=0&&h>=0&&Math.abs(a-h)<=1;}
+function infoLine(id){var p=prof(id),x=[gTxt(id)];if(ageOf(id))x.push(ageOf(id));if(p.area)x.push(p.area);return x.join(' · ');}
+function dietChips(id){var d=dietsOf(id);return d.length?'<div class="tags">'+d.map(function(x){return '<span class="tag">'+esc(x)+'</span>';}).join('')+'</div>':'';}
+function isBlockedUser(id){return priv.blocks.indexOf(id)>=0;}
+function mannerOf(id){var c={},again=0,n=0;Object.keys(reviews).forEach(function(by){var it=(reviews[by]&&reviews[by].items)||{};Object.keys(it).forEach(function(k){var r=it[k];if(!r||r.target!==id)return;n++;(r.tags||[]).forEach(function(tg){c[tg]=(c[tg]||0)+1;});if(r.again)again++;});});
+  var top=Object.keys(c).sort(function(a,b){return c[b]-c[a];});return {counts:c,top:top,again:again,n:n};}
+function isDismissed(by,k){return !!(moder.dismissed&&moder.dismissed[safeId(by)+'|'+k]);}
+function isBanned(id){var b=bans[id];return b&&b.until>Date.now()?b.until:0;}
+function nsTables(id){var s={};Object.keys(noshows).forEach(function(by){var it=(noshows[by]&&noshows[by].items)||{};Object.keys(it).forEach(function(k){var r=it[k];if(r&&r.target===id&&r.tableId&&!isDismissed(by,k))s[r.tableId]=Math.max(s[r.tableId]||0,r.at||0);});});return s;}
+function nsCount(id){return Object.keys(nsTables(id)).length;}
+function restrictedUntil(id){var bn=isBanned(id);if(bn)return bn;var s=nsTables(id),ks=Object.keys(s);if(ks.length<NS_LIMIT)return 0;var last=0;ks.forEach(function(k){last=Math.max(last,s[k]);});var u=last+NS_DAYS*864e5;return u>Date.now()?u:0;}
+function myRestriction(){return uid?restrictedUntil(uid):0;}
+
+// ---------- membership ----------
+function reqsOf(t){return reqs.filter(function(r){return r.tableId===t.id;});}
+function membersOf(t){var ids=[t.hostId];reqsOf(t).forEach(function(r){if(r.status==='accepted'&&ids.indexOf(r.userId)<0)ids.push(r.userId);});return ids;}
+function pendingOf(t){return reqsOf(t).filter(function(r){return r.status==='pending';});}
+function myReq(t){return reqsOf(t).filter(function(r){return r.userId===uid;})[0];}
+function isMember(t){return membersOf(t).indexOf(uid)>=0;}
+function isFull(t){return membersOf(t).length>=t.capacity;}
+function upcoming(t){return when(t)>Date.now()-2*3600e3;}
+function phase(t){var w=when(t),n=Date.now();if(n<w-2*3600e3)return 'before';if(n<w+3600e3)return 'day';if(n<w+REVIEW_WINDOW)return 'after';return 'closed';}
+function gBlocked(t){return (t.genderOnly&&myGender()!==t.genderOnly)||!ageNearOk(t);}
+function blockReason(t){if(t.genderOnly&&myGender()!==t.genderOnly)return GL[t.genderOnly]+'만 참여할 수 있어요';if(!ageNearOk(t))return ageNum(uid)?ageRangeTxt(t)+'만 참여할 수 있어요':'프로필에서 출생연도를 먼저 설정해 주세요';return '';}
+function hasBlockedMember(t){return membersOf(t).some(function(id){return id!==uid&&isBlockedUser(id);});}
+function reviewKey(t,target){return safeId(t.id)+'__'+safeId(target);}
+function reviewedAll(t){var it=(reviews[uid]&&reviews[uid].items)||{};var ns=(noshows[uid]&&noshows[uid].items)||{};return membersOf(t).filter(function(id){return id!==uid;}).every(function(id){var k=reviewKey(t,id);return it[k]||ns[k];});}
+function needsReview(t){return isMember(t)&&membersOf(t).length>1&&phase(t)==='after'&&!reviewedAll(t);}
+
+// ---------- match score ----------
+function matchInfo(t){
+  var m=me(),sc=0,why=[];
+  if(m.area&&t.area===m.area){sc+=3;why.push('같은 동네');}
+  var ov=(m.purposes||[]).filter(function(p){return (t.purposes||[]).indexOf(p)>=0;});
+  if(ov.length){sc+=2*ov.length;why.push(ov[0]);}
+  var ai=ageIdx(uid),hi=ageIdx(t.hostId);if(ai>=0&&hi>=0&&Math.abs(ai-hi)<=1){sc+=1;why.push(ai===hi?'같은 연령대':'비슷한 또래');}
+  var dv=dietsOf(uid).filter(function(d){return d!=='가리는 것 없어요'&&dietsOf(t.hostId).indexOf(d)>=0;});if(dv.length){sc+=1;why.push('식습관: '+dv[0]);}
+  var mt=mannerOf(t.hostId);if(mt.again>0){sc+=1;why.push('재매칭 희망 '+mt.again+'회');}
+  var h=(when(t)-Date.now())/3600e3;if(h>0&&h<24){sc+=1;}
+  if(t.quick)sc+=1;
+  return {score:sc,why:why};
+}
+function visible(t){return !isBlockedUser(t.hostId)&&!isBanned(t.hostId)&&!hasBlockedMember(t)&&t.status!=='closed';}
+
+// ---------- private state ----------
+function savePriv(){if(!uid||!db)return;if(privBusy){privQ=true;return;}privBusy=true;
+  db.doc('data/users/'+uid+'/state').set({blocks:priv.blocks.slice(0,500),lastRead:priv.lastRead,agreedAt:priv.agreedAt||0,updatedAt:Date.now()})
+  .then(function(){privBusy=false;if(privQ){privQ=false;savePriv();}}).catch(function(){privBusy=false;});}
+function markRead(tid){priv.lastRead[tid]=Date.now();clearTimeout(markT);markT=setTimeout(function(){markT=null;savePriv();},800);}
+function joinedAt(t){if(t.hostId===uid)return t.createdAt||0;var r=myReq(t);return r?(r.decidedAt||r.at||0):Infinity;}
+function unread(t){if(!isMember(t))return 0;var since=Math.max(priv.lastRead[t.id]||0,joinedAt(t));return messages.filter(function(m){return m.tableId===t.id&&m.userId!==uid&&!isBlockedUser(m.userId)&&m.at>since;}).length;}
+function hostPending(){return tables.filter(function(t){return t.hostId===uid&&upcoming(t);}).reduce(function(n,t){return n+pendingOf(t).length;},0);}
+function myBadge(){return tables.reduce(function(n,t){return n+unread(t)+(needsReview(t)?1:0);},0)+hostPending();}
+function notify(tid,title,body){S.notice={tid:tid,title:title,body:body};clearTimeout(notify._t);notify._t=setTimeout(function(){S.notice=null;render();},5000);}
+
+// ---------- writes ----------
+function saveProfile(data,okMsg){
+  if(!uid)return Promise.resolve();
+  var next=Object.assign({},me(),data,{updatedAt:Date.now()});delete next._id;
+  profiles[uid]=next;render();
+  return db.doc('profiles/'+uid).set(next).then(function(){if(okMsg)toast(okMsg);}).catch(function(e){fail(e);});
+}
+function guard(){
+  if(myRestriction()){toast(fmtDate(myRestriction())+'까지 이용이 제한돼요');return false;}
+  return true;
+}
+function createTable(){
+  var f=S.form;if(!guard())return;
+  if(!f.title.trim()){toast('한 줄 소개를 입력해 주세요');return;}
+  if(!f.quick&&(!f.date||!f.time)){toast('날짜와 시간을 정해 주세요');return;}
+  var date=f.date,time=f.time;
+  if(f.quick){var d=new Date(Date.now()+30*60e3);d.setMinutes(Math.ceil(d.getMinutes()/10)*10);date=ymd(d);time=pad(d.getHours())+':'+pad(d.getMinutes()%60);}
+  S.busy=true;render();
+  db.collection('tables').add({hostId:uid,title:f.title.trim().slice(0,60),area:f.area,place:f.place.trim().slice(0,40),menu:f.menu,mode:f.mode,purposes:f.purposes.slice(0,3),
+    date:date,time:time,quick:!!f.quick,genderOnly:f.only?myGender():null,ageMin:f.range?f.amin:null,ageMax:f.range?f.amax:null,capacity:Math.max(2,Math.min(6,f.capacity|0)),note:f.note.trim().slice(0,300),createdAt:Date.now(),status:'open'})
+  .then(function(ref){S.busy=false;S.form=null;S.sel=ref.id;S.prev='home';S.screen='detail';toast(f.quick?'번개 밥약을 열었어요':'밥약을 열었어요');})
+  .catch(fail);
+}
+function requestJoin(t){
+  if(!guard())return;
+  if(hasBlockedMember(t)){toast('차단한 사용자가 있는 밥약이에요');return;}
+  if(gBlocked(t)){toast(blockReason(t));return;}
+  if(isFull(t)){toast('이미 인원이 다 찼어요');return;}
+  S.busy=true;render();
+  db.collection('joins').doc(safeId(t.id)+'__'+safeId(uid)).set({tableId:t.id,userId:uid,at:Date.now(),status:'pending',msg:S.reqMsg.trim().slice(0,80)})
+  .then(function(){S.busy=false;S.reqMsg='';toast('신청했어요. 모집자가 수락하면 알려드려요');}).catch(fail);
+}
+function decide(t,r,ok){
+  if(ok&&isFull(t)){toast('인원이 다 찼어요');return;}
+  S.busy=true;render();
+  db.collection('joins').doc(r._id).update({status:ok?'accepted':'declined',decidedAt:Date.now()})
+  .then(function(){S.busy=false;toast(ok?nick(r.userId)+'님과 매칭됐어요':'신청을 거절했어요');}).catch(fail);
+}
+function cancelReq(t){var r=myReq(t);if(!r)return;S.busy=true;render();db.collection('joins').doc(r._id).delete().then(function(){S.busy=false;toast('참여를 취소했어요');}).catch(fail);}
+function kick(t,id){var r=reqsOf(t).filter(function(x){return x.userId===id;})[0];if(!r)return;S.busy=true;S.memMenu=null;render();db.collection('joins').doc(r._id).delete().then(function(){S.busy=false;toast('밥약에서 내보냈어요');}).catch(fail);}
+function closeTable(t){
+  S.busy=true;render();
+  var chain=db.collection('tables').doc(t.id).delete();
+  reqsOf(t).forEach(function(r){chain=chain.then(function(){return db.collection('joins').doc(r._id).delete();});});
+  messages.filter(function(m){return m.tableId===t.id;}).forEach(function(m){chain=chain.then(function(){return db.collection('messages').doc(m._id).delete();});});
+  chain.then(function(){S.busy=false;S.confirmDel=false;S.screen='my';S.sel=null;toast('밥약을 닫았어요');}).catch(fail);
+}
+function sendMsg(t,txt,sys){
+  txt=(txt||'').trim();if(!txt)return;
+  if(!sys){S.draft='';var el=document.getElementById('chat-in');if(el)el.value='';}
+  db.collection('messages').add({tableId:t.id,userId:uid,text:txt.slice(0,300),sys:!!sys,at:Date.now()}).catch(function(e){if(!sys)S.draft=txt;fail(e);});
+}
+function arrived(t){sendMsg(t,nick(uid)+'님이 도착했어요',true);toast('도착을 알렸어요');}
+function submitReview(t){
+  var rv=S.rv||{},items=Object.assign({},(reviews[uid]&&reviews[uid].items)||{}),nsItems=Object.assign({},(noshows[uid]&&noshows[uid].items)||{}),anyNs=false,any=false;
+  membersOf(t).filter(function(id){return id!==uid;}).forEach(function(id){
+    var r=rv[id]||{tags:[],again:false,ns:false},k=reviewKey(t,id);
+    if(r.ns){nsItems[k]={tableId:t.id,target:id,at:Date.now()};anyNs=true;}
+    else{items[k]={tableId:t.id,target:id,tags:(r.tags||[]).slice(0,5),again:!!r.again,at:Date.now()};}
+    any=true;
+  });
+  if(!any)return;
+  var cut=Date.now()-180*864e5;[items,nsItems].forEach(function(o){Object.keys(o).forEach(function(k){if((o[k].at||0)<cut)delete o[k];});});
+  S.busy=true;render();
+  var p=db.doc('reviews/'+uid).set({items:items});
+  if(anyNs)p=p.then(function(){return db.doc('noshows/'+uid).set({items:nsItems});});
+  p.then(function(){S.busy=false;S.rv=null;S.screen='my';toast('후기를 남겼어요. 고마워요!');}).catch(fail);
+}
+function toggleBlock(id){var i=priv.blocks.indexOf(id);if(i>=0){priv.blocks.splice(i,1);toast('차단을 풀었어요');}else{priv.blocks.push(id);toast(nick(id)+'님을 차단했어요');}S.memMenu=null;savePriv();render();}
+function addAd(){var f=S.adForm;if(!f.name.trim()){toast('가게 이름을 입력해 주세요');return;}S.busy=true;render();
+  db.collection('ads').add({name:f.name.trim().slice(0,40),area:f.area,menu:f.menu,copy:f.copy.trim().slice(0,200),perk:f.perk.trim().slice(0,60),addr:f.addr.trim().slice(0,80),createdAt:Date.now()})
+  .then(function(){S.busy=false;S.adForm=null;S.screen='my';toast('광고를 등록했어요');}).catch(function(e){S.busy=false;toast(e&&e.code==='invalid_argument'?'광고는 관리자만 등록할 수 있어요':'등록하지 못했어요');});}
+function delAd(id){db.collection('ads').doc(id).delete().then(function(){toast('광고를 내렸어요');}).catch(function(){toast('삭제하지 못했어요');});}
+
+// ---------- view helpers ----------
+function chips(list,cur,act,multi){return list.map(function(v){var val=Array.isArray(v)?v[0]:v,lab=Array.isArray(v)?v[1]:v,on=multi?(cur||[]).indexOf(val)>=0:cur===val;return '<button class="chip'+(on?' on':'')+'" data-act="'+act+'" data-v="'+esc(val)+'" aria-pressed="'+(on?'true':'false')+'">'+esc(lab)+'</button>';}).join('');}
+function checkRow(act,on,label){return '<button class="ckrow" data-act="'+act+'" aria-pressed="'+(on?'true':'false')+'"><span class="ck'+(on?' on':'')+'" aria-hidden="true">'+(on?'✓':'')+'</span><span>'+label+'</span></button>';}
+function modeTag(t){var k=t.mode==='talk'?'talk':'quiet';return '<span class="tag '+k+'">'+MODE[k]+'</span>';}
+function mannerChips(id,n){var m=mannerOf(id);if(!m.top.length)return '';return '<div class="mtags">'+m.top.slice(0,n||3).map(function(tg){return '<span class="mtag">'+esc(tg)+' '+m.counts[tg]+'</span>';}).join('')+'</div>';}
+function card(t,showWhy){
+  var n=membersOf(t).length,full=n>=t.capacity,mi=showWhy?matchInfo(t):null,u=unread(t),mr=myReq(t),mt=mannerOf(t.hostId);
+  var status=isMember(t)&&t.hostId!==uid?'<span class="tag ok">참여 확정</span>':(mr&&mr.status==='pending'?'<span class="tag">수락 대기</span>':'');
+  if(t.hostId===uid){var pc=pendingOf(t).length;status='<span class="tag ok">내 밥약</span>'+(pc?'<span class="tag new">신청 '+pc+'</span>':'');}
+  if(needsReview(t))status+='<span class="tag new">후기 남기기</span>';
+  return '<button class="card" data-act="open" data-id="'+esc(t.id)+'">'+
+   '<span class="thumb" style="background:'+(TINTS[t.menu]||'#F1E6D2')+'">'+esc(t.menu)+'</span>'+
+   '<span class="cbody">'+(mi&&mi.why.length?'<span class="reason">'+esc(mi.why.join(' · '))+'</span>':'')+
+   '<span class="muted">'+esc(t.area)+' · '+(t.place?esc(t.place):'식당은 채팅에서 정해요')+'</span>'+
+   '<span class="ctitle">'+esc(t.title)+'</span>'+
+   '<span class="tags">'+(t.quick?'<span class="tag bolt">번개</span>':'')+modeTag(t)+'<span class="tag">'+dayLabel(t.date)+' '+timeLabel(t)+'</span>'+(t.genderOnly?'<span class="tag g">'+GL[t.genderOnly]+'만</span>':'')+(ageRangeTxt(t)?'<span class="tag g">'+esc(ageRangeTxt(t))+'</span>':'')+(full?'<span class="tag full">모집 완료</span>':'')+status+(u?'<span class="tag new">새 메시지 '+u+'</span>':'')+'</span>'+
+   '<span class="hostline">'+esc(nick(t.hostId))+' · '+esc(gTxt(t.hostId))+(ageOf(t.hostId)?' · '+esc(ageOf(t.hostId)):'')+(mt.top[0]?' · '+esc(mt.top[0]):'')+'</span>'+
+   '<span class="cnt">'+n+'/'+t.capacity+'명 · 각자 결제</span></span></button>';
+}
+function adCard(a){return '<button class="adc" data-act="openAd" data-id="'+esc(a._id)+'"><span class="adth" style="background:'+(TINTS[a.menu]||'#F1E6D2')+'">'+esc(a.menu||'')+'</span><span class="adb"><span class="adl">광고</span><b>'+esc(a.name)+'</b><span class="muted">'+esc(a.area||'')+'</span>'+(a.perk?'<span class="adp">'+esc(a.perk)+'</span>':'')+'</span></button>';}
+function notes(){
+  var u=myRestriction(),h='';
+  if(u)h+='<div class="banner2 red">'+(isBanned(uid)?'운영 정책에 따라 ':'노쇼 신고가 '+NS_LIMIT+'회 쌓여 ')+fmtDate(u)+'까지 밥약을 열거나 신청할 수 없어요.</div>';
+  if(readOnly||canWrite===false)h+='<div class="banner2">지금은 둘러보기만 할 수 있어요. 함께 쓰려면 공유한 사람에게 편집 권한을 요청해 주세요.</div>';
+  return h;
+}
+function topBar(title,back){return '<div class="top">'+(back?'<button class="iconbtn" data-act="back" aria-label="뒤로">'+ICON.back+'</button>':'<span style="width:16px"></span>')+'<h1>'+title+'</h1></div>';}
+
+// ---------- screens ----------
+function needOnboard(){return db&&uid&&privLoaded&&loaded.p&&!priv.agreedAt&&!(readOnly||canWrite===false);}
+function obOk(o){return !!(o.nick.trim()&&o.gender&&validBy(o.by)&&o.area&&o.purposes.length&&o.age&&o.agree);}
+function vOnboard(){
+  var o=S.ob||(S.ob={nick:me().nick||'',gender:me().gender||null,by:me().birthYear?String(me().birthYear):'',diets:(me().diets||[]).slice(),area:me().area||'상도동',purposes:(me().purposes||[]).slice(),age:false,agree:false});
+  var ok=obOk(o);
+  return '<main class="main" id="main"><div style="padding:40px 22px 20px;display:flex;flex-direction:column;gap:22px">'+
+   '<div><div class="brand" style="color:var(--accent)">'+LOGO.replace('width="34" height="17"','width="56" height="28"')+'<b style="font-size:28px">Co-Meal</b></div><div style="font-size:22px;font-weight:800;line-height:1.4;margin-top:12px">혼자 먹기 싫은 날,<br>동네 밥친구를 찾아보세요</div></div>'+
+   '<div class="field"><label for="ob-nick">닉네임</label><input class="inp" id="ob-nick" maxlength="12" placeholder="예: 상도 자취러" value="'+esc(o.nick)+'"></div>'+
+   '<div class="field"><span class="lbl">성별</span><div class="chips" style="margin:0">'+chips([['female','여성'],['male','남성']],o.gender,'obG')+'</div></div>'+
+   '<div class="field"><label for="ob-by">출생연도</label><input class="inp" id="ob-by" inputmode="numeric" maxlength="4" placeholder="예: 2003" value="'+esc(o.by)+'"><span class="muted" style="font-size:12px">다른 사람에게는 \'20대 중반\'처럼 연령대로만 보여요.</span></div>'+
+   '<div class="field"><span class="lbl">주로 밥 먹는 동네</span><div class="chips" style="margin:0">'+chips(AREAS,o.area,'obA')+'</div></div>'+
+   '<div class="field"><span class="lbl">코밀을 쓰는 이유 <span class="muted" style="font-weight:400">(여러 개 선택)</span></span><div class="chips" style="margin:0">'+chips(PURPOSES,o.purposes,'obP',true)+'</div><span class="muted" style="font-size:12px">이유가 겹치는 사람의 밥약을 먼저 보여드려요.</span></div>'+
+   '<div class="field"><span class="lbl">식습관 <span class="muted" style="font-weight:400">(선택 · 여러 개)</span></span><div class="chips" style="margin:0">'+chips(DIETS,o.diets,'obD',true)+'</div><span class="muted" style="font-size:12px">메뉴 고를 때 서로 참고할 수 있게 프로필에 보여요.</span></div>'+
+   '<div class="note" style="margin:0"><b>안심하고 이용하기 위한 약속</b>\n· 처음 만남은 식당·카페 같은 열린 곳에서만 해요.\n· 연락처, 주소 같은 개인정보는 충분히 알게 된 뒤에 나눠요.\n· 식사 후에는 서로 매너 평가를 남겨요. 노쇼 신고가 3회 쌓이면 14일 동안 이용이 제한돼요.</div>'+
+   '<div style="display:flex;flex-direction:column;gap:4px">'+checkRow('obAge',o.age,'만 19세 이상이에요')+checkRow('obAgree',o.agree,'위 약속을 지키고, 닉네임·성별·연령대·식습관·매너 평가가 다른 이용자에게 보이는 것에 동의해요')+'</div>'+
+  '</div></main><div class="bar"><button class="btn" data-act="obStart"'+(ok&&!S.busy?'':' disabled')+'>시작하기</button></div>';
+}
+function vHome(){
+  var m=me(),f=S.filter,live=tables.filter(upcoming).filter(visible);
+  var mine=live.filter(function(t){return t.hostId!==uid&&!isMember(t)&&!isFull(t)&&!gBlocked(t);});
+  var best=mine.map(function(t){return {t:t,s:matchInfo(t).score};}).filter(function(x){return x.s>=3;}).sort(function(a,b){return b.s-a.s||when(a.t)-when(b.t);}).slice(0,3).map(function(x){return x.t;});
+  var areaCnt=live.filter(function(t){return t.area===m.area;}).length;
+  var list=live.filter(function(t){return (f.mode==='all'||t.mode===f.mode)&&(f.menu==='전체'||t.menu===f.menu);}).sort(function(a,b){return when(a)-when(b);});
+  var body;
+  if(!loaded.t)body='<div class="empty"><span class="muted">'+(slow?'데이터에 아직 연결하지 못했어요. 잠시만 기다려 주세요.':'불러오는 중…')+'</span></div>';
+  else if(loadErr)body='<div class="empty"><b>데이터를 불러오지 못했어요</b><span class="muted">'+esc(loadErr)+'</span></div>';
+  else if(!list.length)body='<div class="empty"><b>'+(live.length?'조건에 맞는 밥약이 없어요':'아직 열린 밥약이 없어요')+'</b><span class="muted">첫 밥약을 열고 동네 밥친구를 모아 보세요</span><button class="pill" data-act="create">밥약 열기</button></div>';
+  else body=list.map(function(t){return card(t,false);}).join('');
+  return '<header class="hdr"><div class="brand" style="color:var(--accent)">'+LOGO+'<b>Co-Meal</b></div><button class="iconbtn" data-act="create" aria-label="밥약 열기">'+ICON.plus+'</button></header>'+
+   '<section class="hero"><div class="k">'+esc(m.area||'동작구')+' · 지금 열린 밥약 '+areaCnt+'개</div><div class="t">'+esc(nick(uid))+'님, 오늘은<br>누구랑 먹을까요?</div>'+
+    '<div class="acts"><button class="pill" data-act="quick">지금 먹을 사람 찾기</button><button class="pill light" data-act="nav" data-v="find">조건으로 찾기</button></div></section>'+
+   notes()+
+   (best.length?'<section class="sec" style="padding-top:8px"><div class="row"><h2>나랑 잘 맞는 밥약</h2><span class="muted">동네·이유가 겹쳐요</span></div></section><div class="list">'+best.map(function(t){return card(t,true);}).join('')+'</div><div class="sep"></div>':'')+
+   (ads.length?'<section class="sec"><div class="row"><h2>동네 맛집</h2><span class="muted">광고</span></div></section><div class="adrow">'+ads.map(adCard).join('')+'</div><div class="sep" style="margin-top:16px"></div>':'')+
+   '<section class="sec"><div class="row"><h2>전체 밥약</h2><span class="muted">'+(loaded.t?list.length+'개':'')+'</span></div>'+
+    '<div class="chips">'+chips([['all','전체'],['quiet','조용히 먹기'],['talk','대화하며 먹기']],f.mode,'fmode')+'</div>'+
+    '<div class="chips scroll">'+chips(['전체'].concat(MENUS.slice(0,8)),f.menu,'fmenu')+'</div></section>'+
+   '<div class="list">'+body+'</div>';
+}
+function vFind(){
+  var F=S.find;if(!F.area)F.area=me().area||'상도동';
+  var res=tables.filter(upcoming).filter(visible).filter(function(t){
+    return t.hostId!==uid&&!isMember(t)&&!isFull(t)&&!gBlocked(t)&&t.mode===F.mood&&slotOf(t.time)===F.slot&&(F.area==='동작구 전체'||t.area===F.area)&&(F.menu==='아무거나'||t.menu===F.menu)&&(!F.near||(function(){var a=ageIdx(uid),h=ageIdx(t.hostId);return a>=0&&h>=0&&Math.abs(a-h)<=1;})());
+  }).sort(function(a,b){return matchInfo(b).score-matchInfo(a).score||when(a)-when(b);});
+  return topBar('밥친구 찾기',false)+
+   '<div class="form" style="padding-top:4px"><div><div style="font-size:22px;font-weight:800;line-height:1.35">어떤 밥친구를<br>찾고 있나요?</div><div class="muted" style="margin-top:6px">조건이 맞는 밥약을, 나와 잘 맞는 순서로 보여드려요</div></div>'+
+   '<div class="field"><span class="lbl">식사 분위기</span><div class="mood">'+
+    '<button class="moodbtn'+(F.mood==='quiet'?' on':'')+'" data-act="fmood" data-v="quiet"><b>조용히 먹기</b><span>말 걸기 부담 없이, 각자 편하게 식사에 집중해요</span></button>'+
+    '<button class="moodbtn'+(F.mood==='talk'?' on':'')+'" data-act="fmood" data-v="talk"><b>대화하며 먹기</b><span>동네 이야기, 공부·자취 꿀팁을 나누며 먹어요</span></button></div></div>'+
+   '<div class="field"><span class="lbl">언제?</span><div class="chips" style="margin:0">'+chips(['점심','저녁','야식'],F.slot,'fslot')+'</div></div>'+
+   '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS,F.menu,'fmenu2')+'</div></div>'+
+   '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS.concat(['동작구 전체']),F.area,'farea2')+'</div></div>'+
+   '<div class="field"><span class="lbl">연령대</span><div class="chips" style="margin:0">'+chips([['all','상관없어요'],['near','비슷한 또래'+(ageOf(uid)?' ('+ageOf(uid)+' ±1)':'')]],F.near?'near':'all','fnear')+'</div></div></div>'+
+   '<div class="sep"></div><section class="sec"><div class="row"><h2>딱 맞는 밥약</h2><span class="muted">'+res.length+'개</span></div></section>'+
+   '<div class="list">'+(res.length?res.map(function(t){return card(t,true);}).join(''):
+     '<div class="empty"><b>아직 조건에 맞는 밥약이 없어요</b><span class="muted">이 조건 그대로 밥약을 열면, 같은 걸 찾는 이웃이 신청할 수 있어요</span><button class="pill" data-act="createFromFind">이 조건으로 밥약 열기</button></div>')+'</div>';
+}
+function newForm(pre){pre=pre||{};var d=new Date();var m=me();
+  return {title:'',area:pre.area&&pre.area!=='동작구 전체'?pre.area:(m.area||'상도동'),place:pre.place||'',menu:pre.menu||'한식',mode:pre.mood||'quiet',purposes:(m.purposes||[]).slice(0,1),date:ymd(d),time:pre.slot==='점심'?'12:30':(pre.slot==='야식'?'21:30':'19:00'),capacity:2,note:'',only:false,range:false,amin:Math.max(19,(ageNum(uid)||25)-3),amax:Math.min(70,(ageNum(uid)||25)+3),quick:!!pre.quick};}
+function vCreate(){
+  var f=S.form||(S.form=newForm());
+  return topBar(f.quick?'번개 밥약 열기':'밥약 열기',true)+notes()+
+  '<form class="form" id="cform" novalidate>'+
+   '<div class="field"><span class="lbl">언제 먹을까요?</span><div class="chips" style="margin:0">'+chips([['quick','지금 바로 (30분 안)'],['plan','날짜 정하기']],f.quick?'quick':'plan','cquick')+'</div></div>'+
+   (f.quick?'':'<div class="two"><div class="field"><label for="f-date">날짜</label><input class="inp" type="date" id="f-date" min="'+ymd(new Date())+'" value="'+esc(f.date)+'"></div><div class="field"><label for="f-time">시간</label><input class="inp" type="time" id="f-time" value="'+esc(f.time)+'"></div></div>')+
+   '<div class="field"><label for="f-title">한 줄 소개</label><input class="inp" id="f-title" maxlength="60" placeholder="예: 감자탕 같이 드실 분, 조용히 먹어요" value="'+esc(f.title)+'"></div>'+
+   '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS,f.menu,'cmenu')+'</div></div>'+
+   '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS,f.area,'carea')+'</div></div>'+
+   '<div class="field"><label for="f-place">식당 <span class="muted" style="font-weight:400">(선택 · 비워두면 채팅에서 정해요)</span></label><input class="inp" id="f-place" maxlength="40" placeholder="가고 싶은 식당이 있다면" value="'+esc(f.place)+'"></div>'+
+   '<div class="field"><span class="lbl">식사 분위기</span><div class="mood">'+
+    '<button type="button" class="moodbtn'+(f.mode==='quiet'?' on':'')+'" data-act="cmode" data-v="quiet"><b>조용히 먹기</b><span>대화는 최소로, 편하게 식사해요</span></button>'+
+    '<button type="button" class="moodbtn'+(f.mode==='talk'?' on':'')+'" data-act="cmode" data-v="talk"><b>대화하며 먹기</b><span>친구처럼 이야기 나누며 먹어요</span></button></div></div>'+
+   '<div class="field"><span class="lbl">이런 분이면 좋아요</span><div class="chips" style="margin:0">'+chips(PURPOSES,f.purposes,'cpur',true)+'</div></div>'+
+   '<div class="field"><span class="lbl">인원 (나 포함)</span><div class="stepper"><button type="button" data-act="cdec" aria-label="인원 줄이기">−</button><output>'+f.capacity+'명</output><button type="button" data-act="cinc" aria-label="인원 늘리기">+</button></div></div>'+
+   '<div class="field"><span class="lbl">참여 가능 성별</span><div class="chips" style="margin:0">'+chips([['any','누구나'],['same','같은 성별만'+(myGender()?' ('+GL[myGender()]+')':'')]],f.only?'same':'any','conly')+'</div></div>'+
+   '<div class="field"><span class="lbl">참여 가능 나이</span><div class="chips" style="margin:0">'+chips([['any','누구나'],['range','나이 정하기']],f.range?'range':'any','crange')+'</div>'+
+    (f.range?'<div class="two" style="margin-top:4px"><div class="field"><span class="muted">최소 나이</span><div class="stepper"><button type="button" data-act="cAminD" aria-label="최소 나이 줄이기">−</button><output>'+f.amin+'세</output><button type="button" data-act="cAminU" aria-label="최소 나이 늘리기">+</button></div></div><div class="field"><span class="muted">최대 나이</span><div class="stepper"><button type="button" data-act="cAmaxD" aria-label="최대 나이 줄이기">−</button><output>'+f.amax+'세</output><button type="button" data-act="cAmaxU" aria-label="최대 나이 늘리기">+</button></div></div></div><span class="muted" style="font-size:12px">'+f.amin+'세부터 '+f.amax+'세까지 신청할 수 있어요. 나이는 출생연도 기준이에요.</span>':'')+'</div>'+
+   '<div class="field"><label for="f-note">하고 싶은 말 <span class="muted" style="font-weight:400">(선택)</span></label><textarea class="inp" id="f-note" maxlength="300" placeholder="예: 맵기는 중간 정도, 각자 결제해요">'+esc(f.note)+'</textarea></div>'+
+  '</form>';
+}
+function stepsBar(t){
+  var mr=myReq(t),host=t.hostId===uid,ph=phase(t),mem=isMember(t)&&membersOf(t).length>1;
+  var st=[['신청',host?membersOf(t).length>1||pendingOf(t).length>0:!!mr],['매칭',mem],['채팅',mem&&messages.some(function(m){return m.tableId===t.id;})],['만남',mem&&(ph==='day'||ph==='after'||ph==='closed')],['평가',mem&&reviewedAll(t)&&ph!=='before'&&ph!=='day']];
+  var cur=-1;for(var i=0;i<st.length;i++){if(!st[i][1]){cur=i;break;}}
+  return '<div class="steps" aria-label="진행 단계">'+st.map(function(s,i){return '<span class="step'+(s[1]?' done':(i===cur?' on':''))+'">'+(i+1)+' '+s[0]+'</span>';}).join('')+'</div>';
+}
+function memberRow(t,id,i,host,mem){
+  var self=id===uid,nc=nsCount(id),bl=isBlockedUser(id),open=S.memMenu===id,p=prof(id);
+  var h='<div class="mrow"><div class="mem"><span class="av">'+initial(id)+'</span><div style="min-width:0"><div style="font-weight:700;font-size:14px">'+esc(nick(id))+(bl?' <span class="tag warn">차단함</span>':'')+'</div>'+
+    '<div class="muted">'+(i===0?'모집자':'참여자')+' · '+esc(infoLine(id))+(nc?' · <span style="color:#B3261E;font-weight:700">노쇼 '+nc+'회</span>':'')+'</div></div>'+
+    (self?'':'<button class="more" data-act="memMenu" data-id="'+esc(id)+'" aria-label="'+esc(nick(id))+' 옵션" aria-expanded="'+(open?'true':'false')+'">···</button>')+'</div>';
+  var dc=dietChips(id);if(dc)h+='<div style="padding-left:54px">'+dc+'</div>';
+  var mc=mannerChips(id,3);if(mc)h+='<div style="padding-left:54px">'+mc+'</div>';
+  if(open&&!self)h+='<div class="memact">'+(host&&i>0?'<button class="mbtn" data-act="kick" data-id="'+esc(id)+'">내보내기</button>':'')+'<button class="mbtn warn" data-act="block" data-id="'+esc(id)+'">'+(bl?'차단 해제':'차단하기')+'</button></div>';
+  return h+'</div>';
+}
+function vDetail(){
+  var t=byId(S.sel);
+  if(!t)return topBar('밥약',true)+'<div class="empty"><b>'+(loaded.t?'닫힌 밥약이에요':'불러오는 중…')+'</b></div>';
+  var ids=membersOf(t),mem=ids.indexOf(uid)>=0,host=t.hostId===uid,ph=phase(t),mr=myReq(t);
+  var msgs=messages.filter(function(m){return m.tableId===t.id&&!isBlockedUser(m.userId);}).sort(function(a,b){return a.at-b.at;});
+  var h=topBar('밥약',true)+'<div class="dhero" style="background:'+(TINTS[t.menu]||'#F1E6D2')+'">'+esc(t.menu)+'</div>'+stepsBar(t)+
+   '<div class="pad" style="display:flex;flex-direction:column;gap:8px;padding-top:14px"><span class="muted">'+esc(t.area)+' · '+(t.place?esc(t.place):'식당은 채팅에서 정해요')+'</span>'+
+   '<div style="font-size:21px;font-weight:800;line-height:1.35;word-break:keep-all">'+esc(t.title)+'</div>'+
+   '<div class="tags">'+(t.quick?'<span class="tag bolt">번개</span>':'')+modeTag(t)+(t.genderOnly?'<span class="tag g">'+GL[t.genderOnly]+'만</span>':'')+(ageRangeTxt(t)?'<span class="tag g">'+esc(ageRangeTxt(t))+'</span>':'')+(t.purposes||[]).map(function(p){return '<span class="tag">'+esc(p)+'</span>';}).join('')+(isFull(t)?'<span class="tag full">모집 완료</span>':'')+'</div></div>'+
+   '<div class="sep"></div><dl class="dl"><div><dt>일시</dt><dd>'+dayLabel(t.date)+' '+timeLabel(t)+'</dd></div><div><dt>인원</dt><dd>'+ids.length+'/'+t.capacity+'명</dd></div><div><dt>결제</dt><dd>각자 결제</dd></div></dl>'+
+   (t.note?'<div class="note">'+esc(t.note)+'</div>':'')+
+   (hasBlockedMember(t)?'<div class="banner2 red">내가 차단한 사용자가 이 밥약에 있어요.</div>':'')+
+   (mr&&mr.status==='pending'?'<div class="banner2">신청했어요. 모집자가 수락하면 채팅방이 열려요.</div>':'')+
+   (mr&&mr.status==='declined'?'<div class="banner2 red">이번 밥약은 매칭되지 않았어요. 다른 밥약을 찾아보세요.</div>':'');
+  if(host&&upcoming(t)){var pend=pendingOf(t);
+    h+='<h3 class="subh">신청한 사람 '+pend.length+'</h3><div class="members">'+(pend.length?pend.map(function(r){var p=prof(r.userId);
+      return '<div class="mrow"><div class="mem"><span class="av">'+initial(r.userId)+'</span><div style="min-width:0"><div style="font-weight:700;font-size:14px">'+esc(nick(r.userId))+'</div><div class="muted">'+esc(infoLine(r.userId))+((p.purposes||[]).length?' · '+esc(p.purposes.join(', ')):'')+(nsCount(r.userId)?' · <span style="color:#B3261E;font-weight:700">노쇼 '+nsCount(r.userId)+'회</span>':'')+'</div></div></div>'+
+       (r.msg?'<div class="note" style="margin:0 0 0 54px;padding:10px 12px">'+esc(r.msg)+'</div>':'')+(dietChips(r.userId)?'<div style="padding-left:54px">'+dietChips(r.userId)+'</div>':'')+(mannerChips(r.userId,3)?'<div style="padding-left:54px">'+mannerChips(r.userId,3)+'</div>':'')+
+       '<div class="memact"><button class="mbtn pri" data-act="accept" data-id="'+esc(r._id)+'"'+(S.busy||isFull(t)?' disabled':'')+'>수락</button><button class="mbtn" data-act="decline" data-id="'+esc(r._id)+'"'+(S.busy?' disabled':'')+'>거절</button></div></div>';}).join(''):'<span class="muted">아직 신청이 없어요. 신청이 오면 알려드려요.</span>')+'</div><div class="sep"></div>';}
+  h+='<h3 class="subh">함께 먹는 사람</h3><div class="members">'+ids.map(function(id,i){return memberRow(t,id,i,host,mem);}).join('')+'</div>';
+  if(mem){
+    h+='<div class="sep"></div><h3 class="subh">밥약 채팅</h3><div class="chat">'+(msgs.length?msgs.map(function(m){if(m.sys)return '<span class="sysmsg">'+esc(m.text)+'</span>';var mine=m.userId===uid;return '<div class="msg'+(mine?' me':'')+'">'+(mine?'':'<span class="who">'+esc(nick(m.userId))+'</span>')+'<span class="txt">'+esc(m.text)+'</span></div>';}).join(''):'<span class="muted">만날 식당과 장소를 정해 보세요</span>')+'</div>'+
+     '<div class="muted" style="padding:0 20px 8px;font-size:12px">처음 만날 땐 식당에서 만나고, 연락처는 충분히 알게 된 뒤에 나눠 주세요.</div>'+
+     (ph==='closed'?'':'<form class="chatin" id="chatform"><label class="sr" for="chat-in">메시지</label><input class="inp" id="chat-in" maxlength="300" placeholder="메시지 보내기" value="'+esc(S.draft)+'" autocomplete="off"><button class="btn sm" aria-label="보내기">'+ICON.send+'</button></form>');
+  }
+  if(host&&S.confirmDel)h+='<div class="confirm"><b>이 밥약을 닫을까요?</b><span class="muted">신청과 채팅도 함께 사라져요.</span><div class="acts"><button class="btn sm" data-act="delYes"'+(S.busy?' disabled':'')+'>닫기</button><button class="btn sm ghost" data-act="delNo">취소</button></div></div>';
+  if(!mem&&!host&&ph!=='closed'&&ph!=='after'&&(!mr||mr.status==='declined')&&!isFull(t)&&!gBlocked(t)&&!hasBlockedMember(t))h+='<div class="field" style="padding:16px 20px 8px"><label for="req-msg">모집자에게 한마디 <span class="muted" style="font-weight:400">(선택)</span></label><input class="inp" id="req-msg" maxlength="80" placeholder="예: 저도 조용히 먹는 거 좋아해요!" value="'+esc(S.reqMsg)+'"></div>';
+  return h;
+}
+function detailBar(){
+  var t=byId(S.sel);if(!t)return '';
+  var host=t.hostId===uid,mem=isMember(t),ph=phase(t),mr=myReq(t),dis=S.busy||readOnly||canWrite===false;
+  if(mem&&needsReview(t))return '<div class="bar"><button class="btn" data-act="review">식사는 어땠나요? 후기 남기기</button></div>';
+  if(mem&&ph==='day'&&membersOf(t).length>1)return '<div class="bar"><button class="btn" data-act="arrived"'+(dis?' disabled':'')+'>도착했어요</button></div>';
+  if(host&&ph==='day')return '<div class="bar"><button class="btn ghost" data-act="delAsk"'+(dis?' disabled':'')+'>밥약 닫기</button></div>';
+  if(host&&ph==='before')return '<div class="bar"><button class="btn ghost" data-act="delAsk"'+(dis?' disabled':'')+'>밥약 닫기</button></div>';
+  if(mem&&ph==='before')return '<div class="bar"><button class="btn ghost" data-act="cancelReq"'+(dis?' disabled':'')+'>참여 취소</button></div>';
+  if(mem)return '';
+  if(mr&&mr.status==='pending')return '<div class="bar"><button class="btn ghost" data-act="cancelReq"'+(dis?' disabled':'')+'>신청 취소</button></div>';
+  if(ph==='after'||ph==='closed')return '<div class="bar"><button class="btn" disabled>지난 밥약이에요</button></div>';
+  var rs=myRestriction(),hb=hasBlockedMember(t),gb=gBlocked(t),full=isFull(t);
+  var lab=full?'모집이 끝났어요':(rs?fmtDate(rs)+'까지 이용 제한':(hb?'차단한 사용자가 있어요':(gb?blockReason(t):'같이 먹기 신청')));
+  return '<div class="bar"><button class="btn" data-act="request"'+(dis||full||rs||hb||gb?' disabled':'')+'>'+lab+'</button></div>';
+}
+function vReview(){
+  var t=byId(S.sel);if(!t)return topBar('후기',true)+'<div class="empty"><b>밥약을 찾을 수 없어요</b></div>';
+  var rv=S.rv||(S.rv={});var others=membersOf(t).filter(function(id){return id!==uid;});
+  return topBar('식사 후기',true)+'<div class="pad" style="padding-bottom:4px"><div style="font-size:20px;font-weight:800;line-height:1.4">'+esc(t.title)+'</div><div class="muted" style="margin-top:4px">'+dayLabel(t.date)+' '+timeLabel(t)+' · 후기는 상대의 프로필에 매너 태그로 쌓여요</div></div>'+
+   others.map(function(id){var r=rv[id]||(rv[id]={tags:[],again:false,ns:false});
+    return '<div class="rv"><div class="mem"><span class="av">'+initial(id)+'</span><div><div style="font-weight:700">'+esc(nick(id))+'</div><div class="muted">'+esc(infoLine(id))+'</div></div></div>'+
+     (r.ns?'':'<div><div class="lbl" style="font-size:14px;font-weight:700;margin-bottom:8px">어떤 점이 좋았나요?</div><div class="chips" style="margin:0">'+MANNER.map(function(tg){var on=r.tags.indexOf(tg)>=0;return '<button class="chip'+(on?' on':'')+'" data-act="rvTag" data-id="'+esc(id)+'" data-v="'+esc(tg)+'" aria-pressed="'+on+'">'+esc(tg)+'</button>';}).join('')+'</div></div>'+
+       checkRow('rvAgain:'+id,r.again,'이 이웃과 또 같이 먹고 싶어요'))+
+     checkRow('rvNs:'+id,r.ns,'약속에 나오지 않았어요 (노쇼 신고)')+'</div>';}).join('');
+}
+function vMy(){
+  var m=me(),mt=mannerOf(uid),mineAll=tables.filter(function(t){return isMember(t);}).sort(function(a,b){return when(a)-when(b);});
+  var toReview=mineAll.filter(needsReview),up=mineAll.filter(function(t){return upcoming(t);}),past=mineAll.filter(function(t){return !upcoming(t)&&!needsReview(t);}).reverse().slice(0,10);
+  var pending=tables.filter(function(t){var r=myReq(t);return r&&r.status==='pending'&&upcoming(t);});
+  var e=S.edit;
+  var h=topBar('내 밥약',false)+notes()+
+   '<div class="pcard"><div class="mem"><span class="av">'+initial(uid)+'</span><div style="min-width:0"><div style="font-size:17px;font-weight:800">'+esc(nick(uid))+'</div><div class="muted">'+esc(infoLine(uid))+'</div></div><button class="mbtn" style="margin-left:auto" data-act="editProfile">'+(e?'닫기':'프로필 수정')+'</button></div>'+
+   ((m.purposes||[]).length?'<div class="tags">'+m.purposes.map(function(p){return '<span class="tag">'+esc(p)+'</span>';}).join('')+'</div>':'')+
+   dietChips(uid)+
+   (ageOf(uid)?'':'<div class="banner2" style="margin:0">출생연도를 설정하면 나이 조건이 있는 밥약에 참여할 수 있고 추천도 더 정확해져요.</div>')+
+   '<div class="muted" style="font-size:12px">받은 매너 평가 '+mt.n+'개 · 재매칭 희망 '+mt.again+'회 · 노쇼 '+nsCount(uid)+'회</div>'+(mannerChips(uid,5)||'')+'</div>';
+  if(e)h+='<div class="form" style="padding-top:16px"><div class="field"><label for="e-nick">닉네임</label><input class="inp" id="e-nick" maxlength="12" value="'+esc(e.nick)+'"></div>'+
+    '<div class="field"><span class="lbl">성별</span><div class="chips" style="margin:0">'+chips([['female','여성'],['male','남성']],e.gender,'eG')+'</div></div>'+
+    '<div class="field"><label for="e-by">출생연도</label><input class="inp" id="e-by" inputmode="numeric" maxlength="4" placeholder="예: 2003" value="'+esc(e.by)+'"></div>'+
+    '<div class="field"><span class="lbl">주로 밥 먹는 동네</span><div class="chips" style="margin:0">'+chips(AREAS,e.area,'eA')+'</div></div>'+
+    '<div class="field"><span class="lbl">코밀을 쓰는 이유</span><div class="chips" style="margin:0">'+chips(PURPOSES,e.purposes,'eP',true)+'</div></div>'+
+    '<div class="field"><span class="lbl">식습관</span><div class="chips" style="margin:0">'+chips(DIETS,e.diets,'eD',true)+'</div></div>'+
+    '<button class="btn" data-act="saveProfile">저장</button></div>';
+  h+=(toReview.length?'<section class="sec"><div class="row"><h2>후기를 기다려요</h2><span class="muted">48시간 안에</span></div></section><div class="list">'+toReview.map(function(t){return card(t,false);}).join('')+'</div><div class="sep"></div>':'')+
+   '<section class="sec"><h2>다가오는 밥약</h2></section><div class="list">'+(up.length?up.map(function(t){return card(t,false);}).join(''):'<div class="empty"><b>아직 잡힌 밥약이 없어요</b><span class="muted">나랑 맞는 밥약에 신청하거나 직접 열어 보세요</span><button class="pill" data-act="nav" data-v="find">밥친구 찾기</button></div>')+'</div>'+
+   (pending.length?'<div class="sep"></div><section class="sec"><h2>수락을 기다리는 신청</h2></section><div class="list">'+pending.map(function(t){return card(t,false);}).join('')+'</div>':'')+
+   (past.length?'<div class="sep"></div><section class="sec"><h2>지난 밥약</h2></section><div class="list">'+past.map(function(t){return card(t,false);}).join('')+'</div>':'')+
+   '<div class="sep"></div><section class="sec"><h2>차단한 사용자</h2><div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">'+(priv.blocks.length?priv.blocks.map(function(id){return '<div class="mem"><span class="av">'+initial(id)+'</span><div style="font-weight:700;font-size:14px">'+esc(nick(id))+'</div><button class="mbtn" style="margin-left:auto" data-act="block" data-id="'+esc(id)+'">차단 해제</button></div>';}).join(''):'<span class="muted">없어요</span>')+'</div></section>';
+  return h+'<div style="height:24px"></div>';
+}
+function vAd(){
+  var a=ads.filter(function(x){return x._id===S.adSel;})[0];
+  if(!a)return topBar('동네 맛집',true)+'<div class="empty"><b>광고가 끝났어요</b></div>';
+  var here=tables.filter(upcoming).filter(visible).filter(function(t){return t.place===a.name;});
+  return topBar('동네 맛집',true)+'<div class="dhero" style="background:'+(TINTS[a.menu]||'#F1E6D2')+'">'+esc(a.menu||'')+'</div>'+
+   '<div class="pad" style="display:flex;flex-direction:column;gap:8px"><span class="adl">광고</span><div style="font-size:22px;font-weight:800">'+esc(a.name)+'</div><span class="muted">'+esc(a.area||'')+' · '+esc(a.menu||'')+'</span></div>'+
+   (a.copy?'<div class="note">'+esc(a.copy)+'</div>':'')+(a.perk?'<div class="perk"><b>코밀로 같이 오면</b><span>'+esc(a.perk)+'</span></div>':'')+(a.addr?'<dl class="dl"><div><dt>위치</dt><dd>'+esc(a.addr)+'</dd></div></dl>':'')+
+   '<div class="sep"></div><section class="sec"><h2>이 가게 밥약</h2></section><div class="list">'+(here.length?here.map(function(t){return card(t,false);}).join(''):'<div class="empty"><span class="muted">아직 열린 밥약이 없어요.</span></div>')+'</div>';
+}
+function vAdNew(){
+  var f=S.adForm||(S.adForm={name:'',area:'상도동',menu:'한식',copy:'',perk:'',addr:''});
+  return topBar('광고 등록',true)+'<form class="form" id="adform" novalidate>'+
+   '<div class="field"><label for="a-name">가게 이름</label><input class="inp" id="a-name" maxlength="40" value="'+esc(f.name)+'"></div>'+
+   '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS,f.area,'aarea')+'</div></div>'+
+   '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS.slice(0,8),f.menu,'amenu')+'</div></div>'+
+   '<div class="field"><label for="a-copy">소개 문구</label><textarea class="inp" id="a-copy" maxlength="200">'+esc(f.copy)+'</textarea></div>'+
+   '<div class="field"><label for="a-perk">코밀 손님 혜택</label><input class="inp" id="a-perk" maxlength="60" placeholder="예: 음료 1잔 서비스" value="'+esc(f.perk)+'"></div>'+
+   '<div class="field"><label for="a-addr">위치 <span class="muted" style="font-weight:400">(선택)</span></label><input class="inp" id="a-addr" maxlength="80" value="'+esc(f.addr)+'"></div></form>';
+}
+function nav(){
+  var s=S.screen,b=myBadge();
+  function it(k,ic,lab,on){var bd=k==='my'&&b?'<span class="badge" aria-label="확인할 알림 '+b+'개">'+(b>99?'99+':b)+'</span>':'';return '<button data-act="nav" data-v="'+k+'" class="'+(on?'on':'')+'"'+(on?' aria-current="page"':'')+'>'+ic+bd+'<span>'+lab+'</span></button>';}
+  return '<nav class="nav" aria-label="하단 메뉴">'+it('home',ICON.home,'홈',s==='home')+it('find',ICON.find,'밥친구 찾기',s==='find')+it('create',ICON.add,'밥약 열기',s==='create')+it('my',ICON.my,'내 밥약',s==='my')+'</nav>';
+}
+
+// ---------- admin ----------
+function isAdminRoute(){return location.hash==='#admin';}
+function aTabs(){var tabs=[['dash','대시보드'],['tables','밥약 관리'],['users','사용자 관리'],['reports','신고 처리'],['ads','광고 관리']];
+  return '<nav class="atabs" aria-label="관리 메뉴">'+tabs.map(function(x){var on=(S.atab||'dash')===x[0];return '<button class="atab'+(on?' on':'')+'" data-act="a_tab" data-v="'+x[0]+'"'+(on?' aria-current="page"':'')+'>'+x[1]+'</button>';}).join('')+'</nav>';}
+function nsAll(){var out=[];Object.keys(noshows).forEach(function(by){var it=(noshows[by]&&noshows[by].items)||{};Object.keys(it).forEach(function(k){var r=it[k];if(r&&r.target)out.push({by:by,k:k,r:r,dis:isDismissed(by,k)});});});return out.sort(function(a,b){return (b.r.at||0)-(a.r.at||0);});}
+function reviewCount(){return Object.keys(reviews).reduce(function(n,by){return n+Object.keys((reviews[by]&&reviews[by].items)||{}).length;},0);}
+function stat(label,val){return '<div class="stat">'+label+'<b>'+val+'</b></div>';}
+function aConfirmBtn(act,id,label,warn){var c=S.aConfirm===act+id;return '<button class="mbtn'+(warn?' warn':'')+(c?' pri':'')+'" data-act="'+act+'" data-id="'+esc(id)+'">'+(c?'한 번 더 눌러 확인':label)+'</button>';}
+function vAdmin(){
+  var tab=S.atab||'dash',h='';
+  if(tab==='dash'){
+    var users=Object.keys(profiles),open=tables.filter(upcoming),acc=reqs.filter(function(r){return r.status==='accepted';}).length,pend=reqs.filter(function(r){return r.status==='pending';}).length;
+    var nsv=nsAll().filter(function(x){return !x.dis;}).length,restr=users.filter(function(id){return restrictedUntil(id);}).length;
+    h+='<div class="stats">'+stat('가입자',users.length+'명')+stat('지금 열린 밥약',open.length+'개')+stat('성사된 매칭',acc+'건')+stat('수락 대기 신청',pend+'건')+stat('매너 후기',reviewCount()+'개')+stat('유효 노쇼 신고',nsv+'건')+stat('이용 제한 중',restr+'명')+'</div>';
+    h+='<h2 class="ah2">동네별 열린 밥약</h2><div class="tblwrap"><table class="tbl"><thead><tr><th>동네</th><th>열린 밥약</th><th>수락 대기 신청</th><th>가입자(주 동네)</th></tr></thead><tbody>'+
+      AREAS.map(function(a){var ot=open.filter(function(t){return t.area===a;});return '<tr><td>'+a+'</td><td>'+ot.length+'</td><td>'+ot.reduce(function(n,t){return n+pendingOf(t).length;},0)+'</td><td>'+users.filter(function(id){return prof(id).area===a;}).length+'</td></tr>';}).join('')+'</tbody></table></div>';
+  } else if(tab==='tables'){
+    var ts=tables.slice().sort(function(a,b){return (upcoming(b)-upcoming(a))||when(a)-when(b);});
+    h+='<h2 class="ah2">전체 밥약 '+ts.length+'개</h2>'+(ts.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>일시</th><th>제목</th><th>동네 · 메뉴</th><th>모집자</th><th>인원</th><th>대기</th><th>상태</th><th></th></tr></thead><tbody>'+
+      ts.map(function(t){return '<tr><td>'+dayLabel(t.date)+' '+timeLabel(t)+'</td><td><b>'+esc(t.title)+'</b></td><td>'+esc(t.area)+' · '+esc(t.menu)+'</td><td>'+esc(nick(t.hostId))+'</td><td>'+membersOf(t).length+'/'+t.capacity+'</td><td>'+pendingOf(t).length+'</td><td>'+(upcoming(t)?'진행 예정':'지난 밥약')+'</td><td>'+aConfirmBtn('a_close',t.id,'닫기',true)+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">아직 밥약이 없어요.</p>');
+  } else if(tab==='users'){
+    var us=Object.keys(profiles).sort(function(a,b){return (restrictedUntil(b)?1:0)-(restrictedUntil(a)?1:0)||nsCount(b)-nsCount(a);});
+    h+='<h2 class="ah2">사용자 '+us.length+'명</h2>'+(us.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>닉네임</th><th>성별 · 연령대 · 동네</th><th>매너 후기</th><th>유효 노쇼</th><th>상태</th><th>관리</th></tr></thead><tbody>'+
+      us.map(function(id){var mt=mannerOf(id),ru=restrictedUntil(id),bn=isBanned(id);return '<tr><td><b>'+esc(nick(id))+'</b></td><td>'+esc(infoLine(id))+'</td><td>'+mt.n+'개'+(mt.top[0]?' · '+esc(mt.top[0]):'')+'</td><td>'+nsCount(id)+'회</td><td>'+(ru?'<span class="tag warn">'+fmtDate(ru)+'까지 제한'+(bn?' (운영자)':' (노쇼)')+'</span>':'<span class="tag ok">정상</span>')+'</td><td style="white-space:nowrap">'+
+        (bn?'<button class="mbtn" data-act="a_unban" data-id="'+esc(id)+'">제한 해제</button>':'<button class="mbtn warn" data-act="a_ban7" data-id="'+esc(id)+'">7일 제한</button> <button class="mbtn warn" data-act="a_ban30" data-id="'+esc(id)+'">30일 제한</button>')+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">아직 가입자가 없어요.</p>');
+    h+='<p class="muted" style="margin-top:12px">노쇼 신고가 '+NS_LIMIT+'회 쌓이면 자동으로 '+NS_DAYS+'일 제한돼요. 운영자 제한은 신고와 별개로 걸 수 있어요.</p>';
+  } else if(tab==='reports'){
+    var rs=nsAll();
+    h+='<h2 class="ah2">노쇼 신고 '+rs.length+'건</h2>'+(rs.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>신고일</th><th>신고한 사람</th><th>신고된 사람</th><th>밥약</th><th>상태</th><th></th></tr></thead><tbody>'+
+      rs.map(function(x){var t=byId(x.r.tableId);return '<tr><td>'+fmtDate(x.r.at||0)+'</td><td>'+esc(nick(x.by))+'</td><td><b>'+esc(nick(x.r.target))+'</b> (누적 '+nsCount(x.r.target)+'회)</td><td>'+(t?esc(t.title):'<span class="muted">닫힌 밥약</span>')+'</td><td>'+(x.dis?'<span class="tag">무효 처리됨</span>':'<span class="tag warn">유효</span>')+'</td><td><button class="mbtn" data-act="a_dismiss" data-id="'+esc(safeId(x.by)+'|'+x.k)+'">'+(x.dis?'다시 유효로':'무효 처리')+'</button></td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">들어온 신고가 없어요.</p>');
+    h+='<p class="muted" style="margin-top:12px">허위 신고로 판단되면 무효 처리하세요. 무효 처리된 신고는 누적 횟수와 자동 제한에서 빠져요.</p>';
+  } else if(tab==='ads'){
+    var f=S.aAd||(S.aAd={name:'',area:'상도동',menu:'한식',copy:'',perk:'',addr:''});
+    h+='<h2 class="ah2">동네 맛집 광고 등록</h2><form class="aform" id="aadform" novalidate>'+
+     '<div class="field"><label for="ad-name">가게 이름</label><input class="inp" id="ad-name" maxlength="40" value="'+esc(f.name)+'"></div>'+
+     '<div class="field"><label for="ad-perk">코밀 손님 혜택</label><input class="inp" id="ad-perk" maxlength="60" placeholder="예: 음료 1잔 서비스" value="'+esc(f.perk)+'"></div>'+
+     '<div class="field"><label for="ad-addr">위치 (선택)</label><input class="inp" id="ad-addr" maxlength="80" value="'+esc(f.addr)+'"></div>'+
+     '<div class="field"><label for="ad-copy">소개 문구</label><textarea class="inp" id="ad-copy" maxlength="200">'+esc(f.copy)+'</textarea></div>'+
+     '<div class="field"><span class="lbl">동네</span><div class="chips" style="margin:0">'+chips(AREAS,f.area,'a_adArea')+'</div></div>'+
+     '<div class="field"><span class="lbl">메뉴</span><div class="chips" style="margin:0">'+chips(MENUS.slice(0,8),f.menu,'a_adMenu')+'</div></div>'+
+     '<div><button class="btn" style="max-width:240px" data-act="a_adAdd"'+(S.busy?' disabled':'')+'>광고 등록</button></div></form>'+
+     '<h2 class="ah2">등록된 광고 '+ads.length+'개</h2>'+(ads.length?'<div class="tblwrap"><table class="tbl"><thead><tr><th>가게</th><th>동네 · 메뉴</th><th>혜택</th><th>등록일</th><th></th></tr></thead><tbody>'+
+      ads.map(function(a){return '<tr><td><b>'+esc(a.name)+'</b></td><td>'+esc(a.area||'')+' · '+esc(a.menu||'')+'</td><td>'+esc(a.perk||'')+'</td><td>'+fmtDate(a.createdAt||0)+'</td><td>'+aConfirmBtn('a_adDel',a._id,'내리기',true)+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="muted">등록된 광고가 없어요.</p>');
+  }
+  return '<header class="ahdr"><div class="brand" style="color:var(--accent)">'+LOGO+'<b>Co-Meal</b><span class="tag" style="margin-left:6px">관리자</span></div><button class="mbtn" data-act="a_exit">참여자 앱 보기</button></header>'+aTabs()+'<div class="adm">'+notesAdmin()+h+'</div>';
+}
+function notesAdmin(){return (readOnly||canWrite===false)?'<div class="banner2" style="margin:0 0 16px">이 계정은 데이터를 바꿀 권한이 없어요.</div>':'';}
+function aBan(id,days){S.aConfirm=null;db.doc('bans/'+safeId(id)).set({userId:id,until:Date.now()+days*864e5,at:Date.now(),reason:'운영자 제한'}).then(function(){toast(nick(id)+'님을 '+days+'일 제한했어요');}).catch(fail);}
+function aUnban(id){db.doc('bans/'+safeId(id)).delete().then(function(){toast('제한을 풀었어요');}).catch(fail);}
+function aDismiss(key){var d=Object.assign({},moder.dismissed||{});if(d[key])delete d[key];else d[key]=true;moder.dismissed=d;render();db.doc('moderation/noshow').set({dismissed:d,updatedAt:Date.now()}).then(function(){toast('신고 상태를 바꿨어요');}).catch(fail);}
+function aAdAdd(){var f=S.aAd;if(!f.name.trim()){toast('가게 이름을 입력해 주세요');return;}S.busy=true;render();
+  db.collection('ads').add({name:f.name.trim().slice(0,40),area:f.area,menu:f.menu,copy:f.copy.trim().slice(0,200),perk:f.perk.trim().slice(0,60),addr:f.addr.trim().slice(0,80),createdAt:Date.now()})
+  .then(function(){S.busy=false;S.aAd=null;toast('광고를 등록했어요');}).catch(fail);}
+function aCloseTable(id){var t=byId(id);if(t)closeTable(t);S.screen='home';}
+function adminClick(a,v,id){
+  var two=function(act){if(S.aConfirm===act+id){S.aConfirm=null;return true;}S.aConfirm=act+id;render();return false;};
+  switch(a){
+    case 'a_tab':S.atab=v;S.aConfirm=null;render();return true;
+    case 'a_exit':location.hash='';render();return true;
+    case 'a_close':if(two('a_close'))aCloseTable(id);return true;
+    case 'a_ban7':aBan(id,7);return true;
+    case 'a_ban30':aBan(id,30);return true;
+    case 'a_unban':aUnban(id);return true;
+    case 'a_dismiss':aDismiss(id);return true;
+    case 'a_adArea':S.aAd.area=v;render();return true;
+    case 'a_adMenu':S.aAd.menu=v;render();return true;
+    case 'a_adAdd':aAdAdd();return true;
+    case 'a_adDel':if(two('a_adDel'))delAd(id);return true;
+  }
+  return false;
+}
+
+// ---------- render ----------
+var lastScreen=null;
+function render(){
+  var app=document.getElementById('app');
+  var ae=document.activeElement,fid=ae&&ae.id,ss=null,se=null;try{if(fid&&ae.setSelectionRange){ss=ae.selectionStart;se=ae.selectionEnd;}}catch(e){}
+  var main=document.getElementById('main'),st=main?main.scrollTop:0;
+  var extra=(S.toast?'<div class="toast" role="status">'+esc(S.toast)+'</div>':'')+(S.notice?'<button class="notice" data-act="open" data-id="'+esc(S.notice.tid)+'"><span style="font-size:12px;color:#F2C9B8;font-weight:700">'+esc(S.notice.title)+'</span><span style="font-size:14px">'+esc(S.notice.body)+'</span></button>':'');
+  if(!db){app.innerHTML='<main class="main" id="main"><div class="empty"><b>'+(dbChecked?'로그인이 필요해요':'불러오는 중…')+'</b>'+(dbChecked?'<span class="muted">claude.ai에 로그인한 상태에서 이 페이지를 열어 주세요.</span>':'')+'</div></main>';return;}
+  var v,bar='',navOn=true;
+  if(isAdminRoute()){
+    app.className='app wide';
+    if(!adminChecked)v='<div class="empty"><span class="muted">권한 확인 중…</span></div>';
+    else if(!amAdmin)v='<div class="empty"><b>관리자만 볼 수 있는 화면이에요</b><span class="muted">밥약에 참여하려면 참여자 앱을 이용해 주세요.</span><button class="pill" data-act="a_exit">참여자 앱으로</button></div>';
+    else v=vAdmin();
+    app.innerHTML='<main class="main" id="main">'+v+'</main>'+(S.toast?'<div class="toast" role="status">'+esc(S.toast)+'</div>':'');
+    restore();return;
+  }
+  app.className='app';
+  if(needOnboard()){v=vOnboard();app.innerHTML=v+extra;restore();return;}
+  if(S.screen==='home')v=vHome();
+  else if(S.screen==='find')v=vFind();
+  else if(S.screen==='create'){v=vCreate();navOn=false;bar='<div class="bar"><button class="btn" data-act="submit"'+(S.busy||readOnly||canWrite===false?' disabled':'')+'>'+(S.busy?'여는 중…':(S.form&&S.form.quick?'번개 밥약 열기':'밥약 열기'))+'</button></div>';}
+  else if(S.screen==='detail'){v=vDetail();bar=detailBar();navOn=false;}
+  else if(S.screen==='review'){v=vReview();navOn=false;bar='<div class="bar"><button class="btn" data-act="rvSubmit"'+(S.busy?' disabled':'')+'>후기 보내기</button></div>';}
+  else if(S.screen==='ad'){v=vAd();navOn=false;var ad=ads.filter(function(x){return x._id===S.adSel;})[0];bar=ad?'<div class="bar"><button class="btn" data-act="adTable">이 가게로 밥약 열기</button></div>':'';}
+  else if(S.screen==='adNew'){v=vAdNew();navOn=false;bar='<div class="bar"><button class="btn" data-act="adSubmit"'+(S.busy?' disabled':'')+'>광고 등록</button></div>';}
+  else v=vMy();
+  app.innerHTML='<main class="main" id="main">'+v+'</main>'+bar+(navOn?nav():'')+extra;
+  restore();
+  function restore(){
+    var m2=document.getElementById('main');
+    if(m2){if(lastScreen===S.screen+(S.sel||''))m2.scrollTop=st;else m2.scrollTop=0;}
+    lastScreen=S.screen+(S.sel||'');
+    if(fid){var el=document.getElementById(fid);if(el){el.focus();try{if(ss!=null)el.setSelectionRange(ss,se);}catch(e){}}}
+  }
+}
+
+// ---------- events ----------
+function toggleIn(arr,v){var i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var a=b.getAttribute('data-act'),v=b.getAttribute('data-v'),id=b.getAttribute('data-id'),t=byId(S.sel);
+  if(a.indexOf('a_')===0){e.preventDefault();if(adminClick(a,v,id))return;}
+  if(a.indexOf('rvAgain:')===0){var ida=a.slice(8);S.rv[ida].again=!S.rv[ida].again;render();return;}
+  if(a.indexOf('rvNs:')===0){var idn=a.slice(5);S.rv[idn].ns=!S.rv[idn].ns;render();return;}
+  switch(a){
+    case 'nav':if(v==='create'){S.form=S.form||newForm();}S.screen=v;S.confirmDel=false;render();break;
+    case 'create':S.form=newForm();S.screen='create';render();break;
+    case 'quick':S.form=newForm({quick:true});S.screen='create';render();break;
+    case 'createFromFind':S.form=newForm(S.find);S.screen='create';render();break;
+    case 'open':S.sel=id;if(['detail','review'].indexOf(S.screen)<0)S.prev=S.screen;S.screen='detail';S.confirmDel=false;S.draft='';S.memMenu=null;S.notice=null;var tt=byId(id);if(tt&&isMember(tt))markRead(tt.id);render();break;
+    case 'back':if(S.screen==='review')S.screen='detail';else if(S.screen==='detail')S.screen=S.prev||'home';else if(S.screen==='adNew')S.screen='my';else S.screen='home';S.confirmDel=false;render();break;
+    case 'fmode':S.filter.mode=v;render();break;
+    case 'fmenu':S.filter.menu=v;render();break;
+    case 'fmood':S.find.mood=v;render();break;
+    case 'fslot':S.find.slot=v;render();break;
+    case 'fmenu2':S.find.menu=v;render();break;
+    case 'farea2':S.find.area=v;render();break;
+    case 'fnear':if(v==='near'&&!ageOf(uid)){toast('프로필에서 출생연도를 먼저 설정해 주세요');break;}S.find.near=v==='near';render();break;
+    case 'cquick':S.form.quick=v==='quick';render();break;
+    case 'carea':S.form.area=v;render();break;
+    case 'cmenu':S.form.menu=v;render();break;
+    case 'cmode':S.form.mode=v;render();break;
+    case 'cpur':toggleIn(S.form.purposes,v);render();break;
+    case 'conly':S.form.only=v==='same';render();break;
+    case 'crange':S.form.range=v==='range';render();break;
+    case 'cAminD':S.form.amin=Math.max(19,S.form.amin-1);render();break;
+    case 'cAminU':S.form.amin=Math.min(S.form.amax,S.form.amin+1);render();break;
+    case 'cAmaxD':S.form.amax=Math.max(S.form.amin,S.form.amax-1);render();break;
+    case 'cAmaxU':S.form.amax=Math.min(70,S.form.amax+1);render();break;
+    case 'cdec':S.form.capacity=Math.max(2,S.form.capacity-1);render();break;
+    case 'cinc':S.form.capacity=Math.min(6,S.form.capacity+1);render();break;
+    case 'submit':createTable();break;
+    case 'request':if(t)requestJoin(t);break;
+    case 'cancelReq':if(t)cancelReq(t);break;
+    case 'accept':case 'decline':if(t){var r=reqs.filter(function(x){return x._id===id;})[0];if(r)decide(t,r,a==='accept');}break;
+    case 'arrived':if(t)arrived(t);break;
+    case 'review':S.rv=null;S.screen='review';render();break;
+    case 'rvTag':toggleIn(S.rv[id].tags,v);render();break;
+    case 'rvSubmit':if(t)submitReview(t);break;
+    case 'memMenu':S.memMenu=S.memMenu===id?null:id;render();break;
+    case 'block':toggleBlock(id);break;
+    case 'kick':if(t)kick(t,id);break;
+    case 'delAsk':S.confirmDel=true;render();var m=document.getElementById('main');if(m)m.scrollTop=m.scrollHeight;break;
+    case 'delNo':S.confirmDel=false;render();break;
+    case 'delYes':if(t)closeTable(t);break;
+    case 'obG':S.ob.gender=v;render();break;
+    case 'obA':S.ob.area=v;render();break;
+    case 'obD':toggleIn(S.ob.diets,v);render();break;
+    case 'obP':toggleIn(S.ob.purposes,v);render();break;
+    case 'obAge':S.ob.age=!S.ob.age;render();break;
+    case 'obAgree':S.ob.agree=!S.ob.agree;render();break;
+    case 'obStart':var o=S.ob;if(o&&obOk(o)){S.busy=true;saveProfile({nick:o.nick.trim().slice(0,12),gender:o.gender,birthYear:validBy(o.by),age:bandOfAge(THIS_YEAR-validBy(o.by)),diets:o.diets.slice(),area:o.area,purposes:o.purposes.slice()}).then(function(){S.busy=false;priv.agreedAt=Date.now();savePriv();S.find.area=o.area;render();});}break;
+    case 'editProfile':var mm=me();S.edit=S.edit?null:{nick:mm.nick||'',gender:mm.gender||null,by:mm.birthYear?String(mm.birthYear):'',diets:(mm.diets||[]).slice(),area:mm.area||'상도동',purposes:(mm.purposes||[]).slice()};render();break;
+    case 'eG':S.edit.gender=v;render();break;
+    case 'eA':S.edit.area=v;render();break;
+    case 'eD':toggleIn(S.edit.diets,v);render();break;
+    case 'eP':toggleIn(S.edit.purposes,v);render();break;
+    case 'saveProfile':var ed=S.edit;if(!ed.nick.trim()){toast('닉네임을 입력해 주세요');break;}if(!validBy(ed.by)){toast('출생연도를 정확히 입력해 주세요 (만 19세 이상)');break;}saveProfile({nick:ed.nick.trim().slice(0,12),gender:ed.gender,birthYear:validBy(ed.by),age:bandOfAge(THIS_YEAR-validBy(ed.by)),diets:ed.diets.slice(),area:ed.area,purposes:ed.purposes.slice()},'프로필을 저장했어요');S.edit=null;break;
+    case 'openAd':S.adSel=id;S.screen='ad';render();break;
+    case 'adTable':var ad=ads.filter(function(x){return x._id===S.adSel;})[0];if(ad){S.form=newForm({area:ad.area,menu:ad.menu,place:ad.name});S.screen='create';render();}break;
+    case 'adNew':S.adForm=null;S.screen='adNew';render();break;
+    case 'adSubmit':addAd();break;
+    case 'delAd':delAd(id);break;
+    case 'aarea':S.adForm.area=v;render();break;
+    case 'amenu':S.adForm.menu=v;render();break;
+  }
+});
+document.addEventListener('input',function(e){
+  var id=e.target.id,v=e.target.value;
+  if(id==='chat-in'){S.draft=v;return;}
+  if(S.aAd&&id.indexOf('ad-')===0){var ak={'ad-name':'name','ad-copy':'copy','ad-perk':'perk','ad-addr':'addr'}[id];if(ak)S.aAd[ak]=v;return;}
+  if(id==='req-msg'){S.reqMsg=v;return;}
+  if(id==='ob-by'&&S.ob){S.ob.by=v.replace(/[^0-9]/g,'').slice(0,4);var b2=document.querySelector('[data-act=obStart]');if(b2)b2.disabled=!obOk(S.ob);return;}
+  if(id==='ob-nick'&&S.ob){S.ob.nick=v;var btn=document.querySelector('[data-act=obStart]');var o=S.ob;if(btn)btn.disabled=!obOk(o);return;}
+  if(id==='e-nick'&&S.edit){S.edit.nick=v;return;}
+  if(id==='e-by'&&S.edit){S.edit.by=v.replace(/[^0-9]/g,'').slice(0,4);return;}
+  if(S.adForm&&id.indexOf('a-')===0){var k={'a-name':'name','a-copy':'copy','a-perk':'perk','a-addr':'addr'}[id];if(k)S.adForm[k]=v;return;}
+  if(!S.form)return;
+  var map={'f-title':'title','f-place':'place','f-date':'date','f-time':'time','f-note':'note'};if(map[id])S.form[map[id]]=v;
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();
+  if(e.target.id==='chatform'){var t=byId(S.sel);if(t)sendMsg(t,S.draft,false);}
+  else if(e.target.id==='cform')createTable();
+  else if(e.target.id==='adform')addAd();
+  else if(e.target.id==='aadform')aAdAdd();
+});
+
+// ---------- data ----------
+function onReqs(arr){
+  if(reqSeen===null){reqSeen={};arr.forEach(function(r){reqSeen[r._id]=r.status;});return;}
+  arr.forEach(function(r){
+    var prev=reqSeen[r._id];reqSeen[r._id]=r.status;if(prev===r.status)return;
+    var t=byId(r.tableId);if(!t)return;
+    if(r.userId===uid&&r.status==='accepted'&&prev)notify(t.id,'매칭됐어요 · '+t.title,'채팅방이 열렸어요. 만날 식당을 정해 보세요');
+    else if(r.userId===uid&&r.status==='declined'&&prev)toast('이번 밥약은 매칭되지 않았어요');
+    else if(t.hostId===uid&&r.status==='pending'&&!prev&&r.userId!==uid&&!isBlockedUser(r.userId))notify(t.id,'새 신청 · '+t.title,nick(r.userId)+'님이 같이 먹고 싶어 해요');
+  });
+}
+function onMsgs(arr){
+  if(!msgInit){msgInit=true;arr.forEach(function(m){seenMsg[m._id]=1;});return;}
+  arr.forEach(function(m){
+    if(seenMsg[m._id])return;seenMsg[m._id]=1;
+    if(m.userId===uid||isBlockedUser(m.userId)||m.at<bootAt-5000)return;
+    var t=byId(m.tableId);if(!t||!isMember(t))return;
+    if(S.screen==='detail'&&S.sel===t.id){markRead(t.id);return;}
+    notify(t.id,(m.sys?'도착 알림':'새 메시지')+' · '+t.title,m.sys?m.text:nick(m.userId)+': '+m.text);
+  });
+}
+function sub(q,key){
+  q.onSnapshot(function(snap){
+    var arr=snap.docs.filter(function(d){return d.exists;}).map(function(d){var o=Object.assign({},d.data());o._id=d.id;if(key==='t')o.id=d.id;return o;});
+    if(key==='t')tables=arr.filter(function(t){return t.hostId&&t.title;});
+    else if(key==='r'){reqs=arr;onReqs(arr);}
+    else if(key==='p'){var mp={};arr.forEach(function(o){mp[o._id]=o;});profiles=mp;}
+    else if(key==='n'){var nm={};arr.forEach(function(o){nm[o._id]=o;});noshows=nm;}
+    else if(key==='v'){var vm={};arr.forEach(function(o){vm[o._id]=o;});reviews=vm;}
+    else if(key==='a')ads=arr.filter(function(a){return a.name;});
+    else if(key==='b'){var bm={};arr.forEach(function(o){if(o.userId)bm[o.userId]=o;});bans=bm;}
+    else if(key==='d'){var md=arr.filter(function(o){return o._id==='noshow';})[0];moder={dismissed:(md&&md.dismissed)||{}};}
+    else{messages=arr;onMsgs(arr);}
+    if(!snap.metadata.fromCache||arr.length)loaded[key]=true;
+    render();
+  },function(){loaded[key]=true;if(key==='t')loadErr='잠시 후 다시 열어 주세요';render();});
+}
+Promise.resolve(window.claude&&window.claude.use?window.claude.use('user'):null).then(function(u){
+  user=u;return Promise.all([u?u.id():null,u&&u.can?u.can('data.write'):null,window.claude&&window.claude.use?window.claude.use('db'):null]);
+}).then(function(r){
+  uid=r[0];canWrite=r[1];db=r[2];dbChecked=true;
+  if(!uid&&db)canWrite=false;
+  if(!db){render();return;}
+  var timer=setTimeout(function(){slow=true;render();},10000);
+  sub(db.collection('tables').orderBy('createdAt','desc').limit(300),'t');
+  sub(db.collection('joins').limit(1000),'r');
+  sub(db.collection('profiles').limit(1000),'p');
+  sub(db.collection('noshows').limit(1000),'n');
+  sub(db.collection('reviews').limit(1000),'v');
+  sub(db.collection('ads').orderBy('createdAt','desc').limit(30),'a');
+  sub(db.collection('bans').limit(1000),'b');
+  sub(db.collection('moderation').limit(10),'d');
+  sub(db.collection('messages').orderBy('at','desc').limit(500),'m');
+  if(uid)db.doc('data/users/'+uid+'/state').onSnapshot(function(d){
+    if(d.exists&&!d.metadata.hasPendingWrites&&!privBusy&&!markT){var x=d.data()||{};priv.blocks=(x.blocks||[]).slice();priv.agreedAt=Math.max(priv.agreedAt||0,x.agreedAt||0);var lr=x.lastRead||{};Object.keys(lr).forEach(function(k){priv.lastRead[k]=Math.max(priv.lastRead[k]||0,lr[k]||0);});}
+    privLoaded=true;render();
+  },function(){privLoaded=true;render();});
+  else privLoaded=true;
+  if(user&&user.canEdit)Promise.resolve(user.canEdit()).then(function(v){amAdmin=!!v;adminChecked=true;render();}).catch(function(){adminChecked=true;render();});else adminChecked=true;
+  window.addEventListener('hashchange',function(){S.aConfirm=null;render();});
+  var iv=setInterval(function(){if(loaded.t){clearTimeout(timer);slow=false;clearInterval(iv);}},500);
+  setInterval(function(){if(S.screen==='detail'||S.screen==='my'||S.screen==='home')render();},60000);
+  render();
+}).catch(function(){dbChecked=true;render();});
+render();
+})();
+</script>
+<div id="demoBadge" style="position:fixed;left:50%;top:4px;transform:translateX(-50%);z-index:9999;background:rgba(42,29,25,.78);color:#fff;font:600 10px/1 'Pretendard','Noto Sans KR',sans-serif;padding:4px 9px;border-radius:10px;display:flex;gap:6px;align-items:center;white-space:nowrap">데모 · 이 기기에만 저장<button onclick="if(confirm('데모 데이터를 처음 상태로 돌릴까요?'))comealDemoReset()" style="all:unset;cursor:pointer;text-decoration:underline;opacity:.85">초기화</button></div>
+</body>
+</html>
